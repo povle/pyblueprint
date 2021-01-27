@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsView
-from PyQt5 import QtGui, QtWidgets, uic
+from PyQt5 import QtGui, QtWidgets, uic, QtCore
 
 BLACK = QtGui.QColor(0, 0, 0)
 
@@ -12,9 +12,18 @@ class Edge(QtWidgets.QGraphicsLineItem):
         self.setPen(QtGui.QPen(BLACK))
 
     def update(self, a=None, b=None):
-        a = a or self.a
-        b = b or self.b
-        self.setLine(*a, *b)
+        self.a = a or self.a
+        self.b = b or self.b
+        self.setLine(*self.a, *self.b)
+
+
+# class NodeItem(QtWidgets.QGraphicsRectItem):
+#     def __init__(self, pos=(0, 0), parent=None):
+#         QtWidgets.QGraphicsRectItem.__init__(self, *pos, 0, 0,
+#                                              parent=parent)
+#         self.node = Node('')
+#         self.proxy = QtWidgets.QGraphicsProxyWidget(self)
+#         self.proxy.setWidget(self.node)
 
 
 class Node(QtWidgets.QRadioButton):
@@ -54,21 +63,58 @@ class BlockItem(QtWidgets.QGraphicsRectItem):
         self.setBrush(QtGui.QBrush(BLACK))
         self.setRect(*pos, self.block.width(), self.block.height())
 
-    def input_node_pos(self):
-        x = self.input_node.x() + self.x()
-        y = self.input_node.y() + self.y()
+        self.connecting = False
+        self.connecting_from_input = False
+
+    def node_pos(self, node):
+        x = node.x() + node.width()/2 + self.x()
+        y = node.y() + node.height()/2 + self.y()
         return (x, y)
 
+    def in_node(self, point, node):
+        pos = self.node_pos(node)
+        return all(abs(a-b) < c/2 for a, b, c in
+                   zip(point, pos, (node.width(), node.height())))
+
+    def input_node_pos(self):
+        return self.node_pos(self.input_node)
+
     def output_node_pos(self):
-        x = self.output_node.x() + self.x()
-        y = self.output_node.y() + self.y()
-        return (x, y)
+        return self.node_pos(self.output_node)
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
             self.input_node.update_edge(self.input_node_pos())
             self.output_node.update_edge(self.output_node_pos())
         return super().itemChange(change, value)
+
+    def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
+        pos = event.buttonDownScenePos(QtCore.Qt.LeftButton)
+        if pos:
+            if self.in_node((pos.x(), pos.y()), self.input_node):
+                self.connecting = True
+                self.connecting_from_input = True
+                node = self.input_node
+            elif self.in_node((pos.x(), pos.y()), self.output_node):
+                self.connecting = True
+                self.connecting_from_input = False
+                node = self.output_node
+        if self.connecting:
+            edge = Edge(self.node_pos(node), self.node_pos(node))
+            self.scene().addItem(edge)
+            node.set_edge(edge)
+        else:
+            return super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
+        pos = (event.pos().x(), event.pos().y())
+        if self.connecting:
+            if self.connecting_from_input:
+                self.input_node.edge.update(a=pos)
+            else:
+                self.output_node.edge.update(b=pos)
+        else:
+            return super().mouseMoveEvent(event)
 
 
 class Block(QtWidgets.QWidget):
@@ -137,3 +183,18 @@ if __name__ == '__main__':
     w = GUI()
     w.show()
     app.exec_()
+
+
+'''
+https://doc.qt.io/qt-5/qtwidgets-graphicsview-diagramscene-example.html
+что переделать:
+# общую структуру
+вынести сцену из окна
+за соединение должна отвечать вся сцена - это объективно другой режим
+объекты должны быть абстрактнее - BlockItem должен наследоваться не от QtWidgets.QGraphicsRectItem, а от некого AbstractSceneItem
+мб не совсем так но энивей должна быть возможность нацепить на конец стрелки невидимый объект - тогда будет нормально работать скролл и все такое
+то есть: на неактивной ноде лежит этот невидимый объект. когда мы двигаем весь блок то объект двигаем вместе с ней "вручную".
+когда схватились за объект то оставляем стандартное поведение. когда его отпустили то надо проверить где он лежит - если на противоположной ноде другого блока то сцепляем.
+очень ли это нужно? хз. попробовать имплементировать пример по ссылке.
+разобраться с системой координат, то что ноды не знают где они - не норма.
+'''
