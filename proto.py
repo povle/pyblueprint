@@ -7,6 +7,8 @@ BLACK = QtGui.QColor(0, 0, 0)
 class Edge(QtWidgets.QGraphicsLineItem):
     def __init__(self, a, b):
         super().__init__(*a, *b)
+        self.a = a
+        self.b = b
         self.setPen(QtGui.QPen(BLACK))
 
     def update(self, a=None, b=None):
@@ -23,12 +25,10 @@ class Node(QtWidgets.QRadioButton):
 
     def set_edge(self, edge: Edge):
         self.edge = edge
-        self.update_edge()
 
-    def update_edge(self):
+    def update_edge(self, pos):
         if self.edge is None:
             return
-        pos = (self.x(), self.y())
         if self.is_input:
             self.edge.update(b=pos)
         else:
@@ -42,6 +42,8 @@ class BlockItem(QtWidgets.QGraphicsRectItem):
 
         self.block = Block()
         self.block.label.setText(label)
+        self.input_node = self.block.inputNode
+        self.output_node = self.block.outputNode
         self.proxy = QtWidgets.QGraphicsProxyWidget(self)
         self.proxy.setWidget(self.block)
 
@@ -53,14 +55,20 @@ class BlockItem(QtWidgets.QGraphicsRectItem):
         self.setRect(*pos, self.block.width(), self.block.height())
 
     def input_node_pos(self):
-        x = self.block.inputNode.x() + self.x()
-        y = self.block.inputNode.y() + self.y()
+        x = self.input_node.x() + self.x()
+        y = self.input_node.y() + self.y()
         return (x, y)
 
     def output_node_pos(self):
-        x = self.block.outputNode.x() + self.x()
-        y = self.block.outputNode.y() + self.y()
+        x = self.output_node.x() + self.x()
+        y = self.output_node.y() + self.y()
         return (x, y)
+
+    def itemChange(self, change, value):
+        if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
+            self.input_node.update_edge(self.input_node_pos())
+            self.output_node.update_edge(self.output_node_pos())
+        return super().itemChange(change, value)
 
 
 class Block(QtWidgets.QWidget):
@@ -86,8 +94,13 @@ class GUI(QtWidgets.QMainWindow):
 
     def on_connect_click(self):
         for a, b in zip(self.rects[:-1], self.rects[1:]):
-            edge = Edge(a.output_node_pos(), b.input_node_pos())
-            self.scene.addItem(edge)
+            self.connect_blocks(a, b)
+
+    def connect_blocks(self, a, b):
+        edge = Edge(a.output_node_pos(), b.input_node_pos())
+        a.output_node.set_edge(edge)
+        b.input_node.set_edge(edge)
+        self.scene.addItem(edge)
 
     def on_addRect_click(self):
         self.add_rect()
