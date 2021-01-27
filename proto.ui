@@ -36,6 +36,13 @@
        <number>15</number>
       </property>
       <item>
+       <widget class="QPushButton" name="connectButton">
+        <property name="text">
+         <string>Connect</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="addRectButton">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -84,7 +91,7 @@
      <x>0</x>
      <y>0</y>
      <width>860</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>

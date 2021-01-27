@@ -8,7 +8,6 @@ class Edge(QtWidgets.QGraphicsLineItem):
     def __init__(self, a, b):
         super().__init__(*a, *b)
         self.setPen(QtGui.QPen(BLACK))
-        self.setBrush(QtGui.QBrush(BLACK))
 
     def update(self, a=None, b=None):
         a = a or self.a
@@ -53,6 +52,16 @@ class BlockItem(QtWidgets.QGraphicsRectItem):
         self.setBrush(QtGui.QBrush(BLACK))
         self.setRect(*pos, self.block.width(), self.block.height())
 
+    def input_node_pos(self):
+        x = self.block.inputNode.x() + self.x()
+        y = self.block.inputNode.y() + self.y()
+        return (x, y)
+
+    def output_node_pos(self):
+        x = self.block.outputNode.x() + self.x()
+        y = self.block.outputNode.y() + self.y()
+        return (x, y)
+
 
 class Block(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -68,20 +77,26 @@ class GUI(QtWidgets.QMainWindow):
         self.setWindowTitle('test')
         self.scene = QGraphicsScene(self.graphicsView)
         self.graphicsView.setScene(self.scene)
-        self.rects = set()
+        self.rects = []
 
-        self.addRectButton.clicked.connect(self.on_click)
+        self.addRectButton.clicked.connect(self.on_addRect_click)
+        self.connectButton.clicked.connect(self.on_connect_click)
 
         self.keys = {45: self.zoom_out, 61: self.zoom_in}
 
-    def on_click(self):
+    def on_connect_click(self):
+        for a, b in zip(self.rects[:-1], self.rects[1:]):
+            edge = Edge(a.output_node_pos(), b.input_node_pos())
+            self.scene.addItem(edge)
+
+    def on_addRect_click(self):
         self.add_rect()
         print([(r.x(), r.y()) for r in self.rects])
 
     def add_rect(self):
         r = BlockItem()
         self.scene.addItem(r)
-        self.rects.add(r)
+        self.rects.append(r)
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         key = event.key()
