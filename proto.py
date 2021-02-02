@@ -1,32 +1,47 @@
-from PyQt5.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsView
+from PyQt5.QtWidgets import QGraphicsItem
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
 
 BLACK = QtGui.QColor(0, 0, 0)
 
 
 class Edge(QtWidgets.QGraphicsLineItem):
-    def __init__(self, a, b):
-        super().__init__(*a, *b)
-        self.a = a
-        self.b = b
+    def __init__(self, start: Node, end: Node):
+        super().__init__(*start.centerPos(), *end.centerPos())
+        self.start = start
+        self.end = end
         self.setPen(QtGui.QPen(BLACK))
 
-    def update(self, a=None, b=None):
-        self.a = a or self.a
-        self.b = b or self.b
-        self.setLine(*self.a, *self.b)
+    def updatePos(self):
+        self.setLine(*self.start.centerPos(), *self.end.centerPos())
 
 
-# class NodeItem(QtWidgets.QGraphicsRectItem):
-#     def __init__(self, pos=(0, 0), parent=None):
-#         QtWidgets.QGraphicsRectItem.__init__(self, *pos, 0, 0,
-#                                              parent=parent)
-#         self.node = Node('')
-#         self.proxy = QtWidgets.QGraphicsProxyWidget(self)
-#         self.proxy.setWidget(self.node)
+class Node(QtWidgets.QGraphicsRectItem):
+    def __init__(self, nodeWidget: QtWidgets.QWidget,
+                 parent: QtWidgets.QGraphicsItem, is_input=False):
+        super().__init__(self,
+                         nodeWidget.x(), nodeWidget.y(),
+                         nodeWidget.width(), nodeWidget.height(),
+                         parent)
+
+        self.is_input = is_input
+        self.edge = None
+
+    def setEdge(self, edge: Edge):
+        if self.edge:
+            self.scene().removeItem(self.edge)
+        self.edge = edge
+
+    def centerPos(self):
+        return (self.x() + self.width/2,
+                self.y() + self.height/2)
+
+    def itemChange(self, change, value):
+        if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
+            self.edge.updatePos()
+        return super().itemChange(change, value)
 
 
-class Node(QtWidgets.QRadioButton):
+class NodeWidget(QtWidgets.QRadioButton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.edge = None
@@ -44,24 +59,23 @@ class Node(QtWidgets.QRadioButton):
             self.edge.update(a=pos)
 
 
-class BlockItem(QtWidgets.QGraphicsRectItem):
+class Block(QtWidgets.QGraphicsRectItem):
     def __init__(self, pos=(0, 0), label='None', parent=None):
-        QtWidgets.QGraphicsRectItem.__init__(self, *pos, 0, 0,
-                                             parent=parent)
+        QtWidgets.QGraphicsRectItem.__init__(self, *pos, 0, 0, parent=parent)
 
-        self.block = Block()
-        self.block.label.setText(label)
-        self.input_node = self.block.inputNode
-        self.output_node = self.block.outputNode
+        self.widget = BlockWidget()
+        self.widget.label.setText(label)
+        self.input_node = self.widget.inputNode
+        self.output_node = self.widget.outputNode
         self.proxy = QtWidgets.QGraphicsProxyWidget(self)
-        self.proxy.setWidget(self.block)
+        self.proxy.setWidget(self.widget)
 
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsScenePositionChanges, True)
         self.setPen(QtGui.QPen(BLACK))
         self.setBrush(QtGui.QBrush(BLACK))
-        self.setRect(*pos, self.block.width(), self.block.height())
+        self.setRect(*pos, self.widget.width(), self.widget.height())
 
         self.connecting = False
         self.connecting_from_input = False
@@ -116,46 +130,57 @@ class BlockItem(QtWidgets.QGraphicsRectItem):
         else:
             return super().mouseMoveEvent(event)
 
+    def testpar(self):
+        rect = QtWidgets.QGraphicsRectItem(0, 0, 0, 0, self)
+        rect.setRect(self.input_node.x(),
+                     self.input_node.y(),
+                     self.input_node.width(),
+                     self.input_node.height())
+        rect.setPen(QtGui.QPen(BLACK))
+        rect.setBrush(QtGui.QBrush(BLACK))
 
-class Block(QtWidgets.QWidget):
+
+class BlockWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         uic.loadUi('./Block.ui', self)
         self.inputNode.is_input = True
 
 
-class GUI(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-        uic.loadUi('./proto.ui', self)
-        self.setWindowTitle('test')
-        self.scene = QGraphicsScene(self.graphicsView)
-        self.graphicsView.setScene(self.scene)
-        self.rects = []
+class Scene(QtWidgets.QGraphicsScene):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.blocks = []
 
-        self.addRectButton.clicked.connect(self.on_addRect_click)
-        self.connectButton.clicked.connect(self.on_connect_click)
+    def addBlock(self):
+        block = Block()
+        self.addItem(block)
+        self.blocks.append(block)
 
-        self.keys = {45: self.zoom_out, 61: self.zoom_in}
-
-    def on_connect_click(self):
-        for a, b in zip(self.rects[:-1], self.rects[1:]):
+    def connectAllBlocks(self):
+        for a, b in zip(self.blocks[:-1], self.blocks[1:]):
             self.connect_blocks(a, b)
+            a.testpar()
 
     def connect_blocks(self, a, b):
         edge = Edge(a.output_node_pos(), b.input_node_pos())
         a.output_node.set_edge(edge)
         b.input_node.set_edge(edge)
-        self.scene.addItem(edge)
+        self.addItem(edge)
 
-    def on_addRect_click(self):
-        self.add_rect()
-        print([(r.x(), r.y()) for r in self.rects])
 
-    def add_rect(self):
-        r = BlockItem()
-        self.scene.addItem(r)
-        self.rects.append(r)
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+        uic.loadUi('./proto.ui', self)
+        self.setWindowTitle('test')
+        self.scene = Scene(self.graphicsView)
+        self.graphicsView.setScene(self.scene)
+
+        self.addRectButton.clicked.connect(self.scene.addBlock)
+        self.connectButton.clicked.connect(self.scene.connectAllBlocks)
+
+        self.keys = {45: self.zoom_out, 61: self.zoom_in}
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         key = event.key()
@@ -180,7 +205,7 @@ class GUI(QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
-    w = GUI()
+    w = MainWindow()
     w.show()
     app.exec_()
 
