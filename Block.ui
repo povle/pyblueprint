@@ -106,7 +106,7 @@
   <customwidget>
    <class>NodeWidget</class>
    <extends>QRadioButton</extends>
-   <header>proto</header>
+   <header>main</header>
   </customwidget>
  </customwidgets>
  <resources/>
