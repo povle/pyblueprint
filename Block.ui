@@ -21,7 +21,7 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
-    <widget class="QRadioButton" name="inputRadioButton">
+    <widget class="NodeWidget" name="inputRadioButton">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -79,7 +79,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="QRadioButton" name="outputRadioButton">
+    <widget class="NodeWidget" name="outputRadioButton">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -102,6 +102,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NodeWidget</class>
+   <extends>QRadioButton</extends>
+   <header>proto</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -4,16 +4,27 @@ from PyQt5 import QtGui, QtWidgets, uic, QtCore
 BLACK = QtGui.QColor(0, 0, 0)
 
 
-class Edge(QtWidgets.QGraphicsLineItem):
-    def __init__(self, start, end):
-        print(*start.centerPos(), *end.centerPos())
-        super().__init__(*start.centerPos(), *end.centerPos())
-        self.start = start
-        self.end = end
+class Line(QtWidgets.QGraphicsLineItem):
+    def __init__(self, startPos: tuple, endPos: tuple):
+        super().__init__(*startPos, *endPos)
+        self.startPos = startPos
+        self.endPos = endPos
         self.setPen(QtGui.QPen(BLACK))
 
+    def updatePos(self, startPos=None, endPos=None):
+        self.startPos = startPos or self.startPos
+        self.endPos = endPos or self.endPos
+        self.setLine(*self.startPos, *self.endPos)
+
+
+class Edge(Line):
+    def __init__(self, start, end):
+        super().__init__(start.centerPos(), end.centerPos())
+        self.start = start
+        self.end = end
+
     def updatePos(self):
-        self.setLine(*self.start.centerPos(), *self.end.centerPos())
+        super().updatePos(self.start.centerPos(), self.end.centerPos())
 
 
 class Node(QtWidgets.QGraphicsRectItem):
@@ -21,9 +32,17 @@ class Node(QtWidgets.QGraphicsRectItem):
                  parent: QtWidgets.QGraphicsItem, is_input=False):
         super().__init__(0, 0, nodeWidget.width(), nodeWidget.height(), parent)
         self.widget = nodeWidget
+        self.widget.clicked.connect(self.onClick)
         self.setPos(nodeWidget.x(), nodeWidget.y())
         self.is_input = is_input
         self.edge = None
+
+    def onClick(self, checked):
+        if not self.edge:
+            node = self
+        else:
+            node = self.edge.start if self.is_input else self.edge.end
+        self.widget.connecting.emit(node)
 
     def setEdge(self, edge: Edge):
         if self.edge:
@@ -38,6 +57,10 @@ class Node(QtWidgets.QGraphicsRectItem):
     def updateEdge(self):
         if self.edge is not None:
             self.edge.updatePos()
+
+
+class NodeWidget(QtWidgets.QRadioButton):
+    connecting = QtCore.pyqtSignal(object)
 
 
 class Block(QtWidgets.QGraphicsRectItem):
@@ -59,9 +82,6 @@ class Block(QtWidgets.QGraphicsRectItem):
         self.setPen(QtGui.QPen(BLACK))
         self.setBrush(QtGui.QBrush(BLACK))
 
-        self.connecting = False
-        self.connecting_from_input = False
-
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
             self.inputNode.updateEdge()
@@ -79,11 +99,14 @@ class Scene(QtWidgets.QGraphicsScene):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.blocks = []
+        self.connectingLine = None
 
     def addBlock(self):
         block = Block()
         self.addItem(block)
         self.blocks.append(block)
+        block.inputNode.widget.connecting.connect(self.onConnecting)
+        block.outputNode.widget.connecting.connect(self.onConnecting)
 
     def connectAllBlocks(self):
         for a, b in zip(self.blocks[:-1], self.blocks[1:]):
@@ -95,6 +118,20 @@ class Scene(QtWidgets.QGraphicsScene):
         b.inputNode.setEdge(edge)
         self.addItem(edge)
 
+    def onConnecting(self, node: Node):
+        mousePos = self.parent().mapFromGlobal(QtGui.QCursor.pos())
+        mousePos = self.parent().mapToScene(mousePos)
+        mousePos = (mousePos.x(), mousePos.y())
+        if self.connectingLine is None:
+            self.connectingLine = Line(node.centerPos(), mousePos)
+            self.addItem(self.connectingLine)
+
+    def mouseMoveEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
+        mousePos = (event.scenePos().x(), event.scenePos().y())
+        if self.connectingLine is not None:
+            self.connectingLine.updatePos(endPos=mousePos)
+        return super().mouseMoveEvent(event)
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -103,6 +140,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle('test')
         self.scene = Scene(self.graphicsView)
         self.graphicsView.setScene(self.scene)
+        self.graphicsView.setMouseTracking(True)
 
         self.addRectButton.clicked.connect(self.scene.addBlock)
         self.connectButton.clicked.connect(self.scene.connectAllBlocks)
