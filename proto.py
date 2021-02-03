@@ -50,11 +50,10 @@ class Node(QtWidgets.QGraphicsRectItem):
         else:
             node = self.edge.start if self.is_input else self.edge.end
             self.removeEdge()
-        node.widget.setChecked(True)
         self.widget.connecting.emit((node, self))
 
     def removeEdge(self):
-        if self.edge:
+        if self.edge is not None:
             self.edge.remove()
 
     def setEdge(self, edge: Edge):
@@ -142,6 +141,7 @@ class Scene(QtWidgets.QGraphicsScene):
         # nodes[0] is the node we are connecting from, nodes[1] is the sender
         if self.connectingLine is None:
             self.connectingFrom = nodes[0]
+            self.connectingFrom.widget.setChecked(True)
             self.connectingLine = Line(nodes[0].centerPos(), mousePos)
             self.addItem(self.connectingLine)
         else:
