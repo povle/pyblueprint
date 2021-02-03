@@ -33,11 +33,9 @@ class Node(QtWidgets.QGraphicsRectItem):
         return (self.scenePos().x() + self.rect().width()/2,
                 self.scenePos().y() + self.rect().height()/2)
 
-    def itemChange(self, change, value):
-        if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
-            if self.edge is not None:
-                self.edge.updatePos()
-        return super().itemChange(change, value)
+    def updateEdge(self):
+        if self.edge is not None:
+            self.edge.updatePos()
 
 
 class Block(QtWidgets.QGraphicsRectItem):
@@ -61,6 +59,12 @@ class Block(QtWidgets.QGraphicsRectItem):
 
         self.connecting = False
         self.connecting_from_input = False
+
+    def itemChange(self, change, value):
+        if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
+            self.inputNode.updateEdge()
+            self.outputNode.updateEdge()
+        return super().itemChange(change, value)
 
 
 class BlockWidget(QtWidgets.QWidget):
