@@ -17,9 +17,10 @@ class Edge(QtWidgets.QGraphicsLineItem):
 
 
 class Node(QtWidgets.QGraphicsRectItem):
-    def __init__(self, nodeWidget: QtWidgets.QWidget,
+    def __init__(self, nodeWidget: QtWidgets.QRadioButton,
                  parent: QtWidgets.QGraphicsItem, is_input=False):
         super().__init__(0, 0, nodeWidget.width(), nodeWidget.height(), parent)
+        self.widget = nodeWidget
         self.setPos(nodeWidget.x(), nodeWidget.y())
         self.is_input = is_input
         self.edge = None
@@ -28,6 +29,7 @@ class Node(QtWidgets.QGraphicsRectItem):
         if self.edge:
             self.scene().removeItem(self.edge)
         self.edge = edge
+        self.widget.setChecked(True)
 
     def centerPos(self):
         return (self.scenePos().x() + self.rect().width()/2,
