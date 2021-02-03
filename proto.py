@@ -70,6 +70,12 @@ class Node(QtWidgets.QGraphicsRectItem):
         if self.edge is not None:
             self.edge.updatePos()
 
+    def connectTo(self, b):
+        edge = Edge(self, b)
+        self.setEdge(edge)
+        b.setEdge(edge)
+        self.scene().addItem(edge)
+
 
 class NodeWidget(QtWidgets.QRadioButton):
     connecting = QtCore.pyqtSignal(object)
@@ -100,6 +106,9 @@ class Block(QtWidgets.QGraphicsRectItem):
             self.outputNode.updateEdge()
         return super().itemChange(change, value)
 
+    def connectTo(self, b):
+        self.outputNode.connectTo(b.inputNode)
+
 
 class BlockWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -123,16 +132,7 @@ class Scene(QtWidgets.QGraphicsScene):
 
     def connectAllBlocks(self):
         for a, b in zip(self.blocks[:-1], self.blocks[1:]):
-            self.connectBlocks(a, b)
-
-    def connectNodes(self, a: Node, b: Node):
-        edge = Edge(a, b)
-        a.setEdge(edge)
-        b.setEdge(edge)
-        self.addItem(edge)
-
-    def connectBlocks(self, a: Block, b: Block):
-        self.connectNodes(a.outputNode, b.inputNode)
+            a.connectTo(b)
 
     def onConnecting(self, nodes: tuple):
         mousePos = self.parent().mapFromGlobal(QtGui.QCursor.pos())
@@ -152,7 +152,7 @@ class Scene(QtWidgets.QGraphicsScene):
             a = connectingFrom if connectingTo.is_input else connectingTo
             b = connectingFrom if connectingFrom.is_input else connectingTo
             if a is not b and a.parentItem() is not b.parentItem():
-                self.connectNodes(a, b)
+                a.connectTo(b)
 
     def stopConnecting(self):
         if self.connectingLine is not None:
