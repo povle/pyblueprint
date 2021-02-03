@@ -42,7 +42,7 @@ class Node(QtWidgets.QGraphicsRectItem):
             node = self
         else:
             node = self.edge.start if self.is_input else self.edge.end
-        self.widget.connecting.emit(node)
+        self.widget.connecting.emit((node, self))
 
     def setEdge(self, edge: Edge):
         if self.edge:
@@ -100,6 +100,7 @@ class Scene(QtWidgets.QGraphicsScene):
         super().__init__(*args, **kwargs)
         self.blocks = []
         self.connectingLine = None
+        self.connectingFrom = None
 
     def addBlock(self):
         block = Block()
@@ -112,25 +113,44 @@ class Scene(QtWidgets.QGraphicsScene):
         for a, b in zip(self.blocks[:-1], self.blocks[1:]):
             self.connectBlocks(a, b)
 
-    def connectBlocks(self, a: Block, b: Block):
-        edge = Edge(a.outputNode, b.inputNode)
-        a.outputNode.setEdge(edge)
-        b.inputNode.setEdge(edge)
+    def connectNodes(self, a: Node, b: Node):
+        edge = Edge(a, b)
+        a.setEdge(edge)
+        b.setEdge(edge)
         self.addItem(edge)
 
-    def onConnecting(self, node: Node):
+    def connectBlocks(self, a: Block, b: Block):
+        self.connectNodes(a.outputNode, b.inputNode)
+
+    def onConnecting(self, nodes: tuple):
         mousePos = self.parent().mapFromGlobal(QtGui.QCursor.pos())
         mousePos = self.parent().mapToScene(mousePos)
         mousePos = (mousePos.x(), mousePos.y())
+
+        # nodes[0] is the node we are connecting from, nodes[1] is the sender
         if self.connectingLine is None:
-            self.connectingLine = Line(node.centerPos(), mousePos)
+            self.connectingFrom = nodes[0]
+            self.connectingLine = Line(nodes[0].centerPos(), mousePos)
             self.addItem(self.connectingLine)
+        else:
+            connectingTo = nodes[1]
+            connectingFrom = self.connectingFrom
+            self.removeItem(self.connectingLine)
+            self.connectingLine = None
+            self.connectingFrom = None
+            a = connectingFrom if connectingTo.is_input else connectingTo
+            b = connectingFrom if connectingFrom.is_input else connectingTo
+            if a is not b:
+                self.connectNodes(a, b)
 
     def mouseMoveEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
-        mousePos = (event.scenePos().x(), event.scenePos().y())
         if self.connectingLine is not None:
+            mousePos = (event.scenePos().x(), event.scenePos().y())
             self.connectingLine.updatePos(endPos=mousePos)
         return super().mouseMoveEvent(event)
+
+    #  def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
+    #     return super().mousePressEvent(event)
 
 
 class MainWindow(QtWidgets.QMainWindow):
