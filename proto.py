@@ -5,7 +5,8 @@ BLACK = QtGui.QColor(0, 0, 0)
 
 
 class Edge(QtWidgets.QGraphicsLineItem):
-    def __init__(self, start: Node, end: Node):
+    def __init__(self, start, end):
+        print(*start.centerPos(), *end.centerPos())
         super().__init__(*start.centerPos(), *end.centerPos())
         self.start = start
         self.end = end
@@ -18,11 +19,8 @@ class Edge(QtWidgets.QGraphicsLineItem):
 class Node(QtWidgets.QGraphicsRectItem):
     def __init__(self, nodeWidget: QtWidgets.QWidget,
                  parent: QtWidgets.QGraphicsItem, is_input=False):
-        super().__init__(self,
-                         nodeWidget.x(), nodeWidget.y(),
-                         nodeWidget.width(), nodeWidget.height(),
-                         parent)
-
+        super().__init__(0, 0, nodeWidget.width(), nodeWidget.height(), parent)
+        self.setPos(nodeWidget.x(), nodeWidget.y())
         self.is_input = is_input
         self.edge = None
 
@@ -32,31 +30,14 @@ class Node(QtWidgets.QGraphicsRectItem):
         self.edge = edge
 
     def centerPos(self):
-        return (self.x() + self.width/2,
-                self.y() + self.height/2)
+        return (self.scenePos().x() + self.rect().width()/2,
+                self.scenePos().y() + self.rect().height()/2)
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
-            self.edge.updatePos()
+            if self.edge is not None:
+                self.edge.updatePos()
         return super().itemChange(change, value)
-
-
-class NodeWidget(QtWidgets.QRadioButton):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.edge = None
-        self.is_input = False
-
-    def set_edge(self, edge: Edge):
-        self.edge = edge
-
-    def update_edge(self, pos):
-        if self.edge is None:
-            return
-        if self.is_input:
-            self.edge.update(b=pos)
-        else:
-            self.edge.update(a=pos)
 
 
 class Block(QtWidgets.QGraphicsRectItem):
@@ -65,86 +46,27 @@ class Block(QtWidgets.QGraphicsRectItem):
 
         self.widget = BlockWidget()
         self.widget.label.setText(label)
-        self.input_node = self.widget.inputNode
-        self.output_node = self.widget.outputNode
         self.proxy = QtWidgets.QGraphicsProxyWidget(self)
         self.proxy.setWidget(self.widget)
+        self.setRect(*pos, self.widget.width(), self.widget.height())
+
+        self.inputNode = Node(self.widget.inputRadioButton, self, True)
+        self.outputNode = Node(self.widget.outputRadioButton, self)
 
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsScenePositionChanges, True)
         self.setPen(QtGui.QPen(BLACK))
         self.setBrush(QtGui.QBrush(BLACK))
-        self.setRect(*pos, self.widget.width(), self.widget.height())
 
         self.connecting = False
         self.connecting_from_input = False
-
-    def node_pos(self, node):
-        x = node.x() + node.width()/2 + self.x()
-        y = node.y() + node.height()/2 + self.y()
-        return (x, y)
-
-    def in_node(self, point, node):
-        pos = self.node_pos(node)
-        return all(abs(a-b) < c/2 for a, b, c in
-                   zip(point, pos, (node.width(), node.height())))
-
-    def input_node_pos(self):
-        return self.node_pos(self.input_node)
-
-    def output_node_pos(self):
-        return self.node_pos(self.output_node)
-
-    def itemChange(self, change, value):
-        if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
-            self.input_node.update_edge(self.input_node_pos())
-            self.output_node.update_edge(self.output_node_pos())
-        return super().itemChange(change, value)
-
-    def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
-        pos = event.buttonDownScenePos(QtCore.Qt.LeftButton)
-        if pos:
-            if self.in_node((pos.x(), pos.y()), self.input_node):
-                self.connecting = True
-                self.connecting_from_input = True
-                node = self.input_node
-            elif self.in_node((pos.x(), pos.y()), self.output_node):
-                self.connecting = True
-                self.connecting_from_input = False
-                node = self.output_node
-        if self.connecting:
-            edge = Edge(self.node_pos(node), self.node_pos(node))
-            self.scene().addItem(edge)
-            node.set_edge(edge)
-        else:
-            return super().mousePressEvent(event)
-
-    def mouseMoveEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
-        pos = (event.pos().x(), event.pos().y())
-        if self.connecting:
-            if self.connecting_from_input:
-                self.input_node.edge.update(a=pos)
-            else:
-                self.output_node.edge.update(b=pos)
-        else:
-            return super().mouseMoveEvent(event)
-
-    def testpar(self):
-        rect = QtWidgets.QGraphicsRectItem(0, 0, 0, 0, self)
-        rect.setRect(self.input_node.x(),
-                     self.input_node.y(),
-                     self.input_node.width(),
-                     self.input_node.height())
-        rect.setPen(QtGui.QPen(BLACK))
-        rect.setBrush(QtGui.QBrush(BLACK))
 
 
 class BlockWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         uic.loadUi('./Block.ui', self)
-        self.inputNode.is_input = True
 
 
 class Scene(QtWidgets.QGraphicsScene):
@@ -159,13 +81,12 @@ class Scene(QtWidgets.QGraphicsScene):
 
     def connectAllBlocks(self):
         for a, b in zip(self.blocks[:-1], self.blocks[1:]):
-            self.connect_blocks(a, b)
-            a.testpar()
+            self.connectBlocks(a, b)
 
-    def connect_blocks(self, a, b):
-        edge = Edge(a.output_node_pos(), b.input_node_pos())
-        a.output_node.set_edge(edge)
-        b.input_node.set_edge(edge)
+    def connectBlocks(self, a: Block, b: Block):
+        edge = Edge(a.outputNode, b.inputNode)
+        a.outputNode.setEdge(edge)
+        b.inputNode.setEdge(edge)
         self.addItem(edge)
 
 
