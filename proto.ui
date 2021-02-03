@@ -79,6 +79,13 @@
           </spacer>
          </item>
          <item>
+          <widget class="QComboBox" name="functionSelectBox">
+           <property name="currentIndex">
+            <number>-1</number>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="addBlockButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -87,7 +94,7 @@
             </sizepolicy>
            </property>
            <property name="text">
-            <string>AddBlock</string>
+            <string>Add block</string>
            </property>
           </widget>
          </item>

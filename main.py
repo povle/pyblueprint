@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsItem
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
+import inspect
 import functions
 
 BLACK = QtGui.QColor(0, 0, 0)
@@ -47,7 +48,8 @@ class Node(QtWidgets.QGraphicsRectItem):
         super().__init__(0, 0, nodeWidget.width(), nodeWidget.height(), parent)
         self.widget = nodeWidget
         self.widget.clicked.connect(self.onClick)
-        self.setPos(nodeWidget.x(), nodeWidget.y())
+        self.setPos(nodeWidget.x()+nodeWidget.parentWidget().x(),
+                    nodeWidget.y()+nodeWidget.parentWidget().y())
         self.is_input = is_input
         self.edge = None
 
@@ -89,11 +91,13 @@ class NodeWidget(QtWidgets.QRadioButton):
 
 class AbstractBlock(QtWidgets.QGraphicsRectItem):
     def __init__(self, widget, pos=(0, 0), parent=None):
-        QtWidgets.QGraphicsRectItem.__init__(self, *pos, 0, 0, parent=parent)
+        QtWidgets.QGraphicsRectItem.__init__(self, 0, 0, 0, 0, parent=parent)
+        self.setPos(*pos)
 
         self.widget = widget
         self.proxy = QtWidgets.QGraphicsProxyWidget(self)
         self.proxy.setWidget(self.widget)
+        self.proxy.setPos(*pos)
         self.setRect(*pos, self.widget.width(), self.widget.height())
 
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
@@ -178,9 +182,9 @@ class Scene(QtWidgets.QGraphicsScene):
         self.blocks = []
         self.connectingLine = None
         self.connectingFrom = None
-        self.inputBlock = InputBlock()
+        self.inputBlock = InputBlock((0, -50))
         self.addBlock(self.inputBlock)
-        self.outputBlock = OutputBlock()
+        self.outputBlock = OutputBlock((0, 50))
         self.addBlock(self.outputBlock)
 
     def addBlock(self, block: AbstractBlock):
@@ -189,8 +193,8 @@ class Scene(QtWidgets.QGraphicsScene):
         for node in block.nodes:
             node.widget.connecting.connect(self.onConnecting)
 
-    def addFunctionBlock(self):
-        self.addBlock(FunctionBlock(functions.reverse))
+    def addFunctionBlock(self, function):
+        self.addBlock(FunctionBlock(function))
 
     def onConnecting(self, nodes: tuple):
         mousePos = self.parent().mapFromGlobal(QtGui.QCursor.pos())
@@ -246,14 +250,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graphicsView.setScene(self.scene)
         self.graphicsView.setMouseTracking(True)
 
-        self.addBlockButton.clicked.connect(self.scene.addFunctionBlock)
+        self.addBlockButton.clicked.connect(self.addFunctionBlock)
         self.runButton.clicked.connect(self.scene.run)
+
+        self.functions = {name: func for name, func in
+                          inspect.getmembers(functions,
+                                             predicate=inspect.isfunction)}
+
+        self.functionSelectBox.addItems(sorted(self.functions.keys()))
 
         self.keys = {
                     45: self.zoom_out,  # -
                     61: self.zoom_in,  # +
                     16777216: self.scene.stopConnecting,  # esc
                      }
+
+    def addFunctionBlock(self):
+        function = self.functions[self.functionSelectBox.currentText()]
+        self.scene.addFunctionBlock(function)
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         key = event.key()
