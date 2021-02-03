@@ -47,11 +47,10 @@ class Node(QtWidgets.QGraphicsRectItem):
     def onClick(self, checked):
         if not self.edge:
             node = self
-            self.widget.setChecked(True)
         else:
             node = self.edge.start if self.is_input else self.edge.end
             self.removeEdge()
-            node.widget.setChecked(True)
+        node.widget.setChecked(True)
         self.widget.connecting.emit((node, self))
 
     def removeEdge(self):
@@ -149,12 +148,11 @@ class Scene(QtWidgets.QGraphicsScene):
             connectingTo = nodes[1]
             connectingFrom = self.connectingFrom
             self.stopConnecting()
+            connectingTo.widget.setChecked(False)
             a = connectingFrom if connectingTo.is_input else connectingTo
             b = connectingFrom if connectingFrom.is_input else connectingTo
             if a is not b and a.parentItem() is not b.parentItem():
                 self.connectNodes(a, b)
-            else:
-                connectingTo.widget.setChecked(False)
 
     def stopConnecting(self):
         if self.connectingLine is not None:
