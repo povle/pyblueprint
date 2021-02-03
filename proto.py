@@ -26,6 +26,13 @@ class Edge(Line):
     def updatePos(self):
         super().updatePos(self.start.centerPos(), self.end.centerPos())
 
+    def remove(self):
+        self.start.edge = None
+        self.start.widget.setChecked(False)
+        self.end.edge = None
+        self.end.widget.setChecked(False)
+        self.scene().removeItem(self)
+
 
 class Node(QtWidgets.QGraphicsRectItem):
     def __init__(self, nodeWidget: QtWidgets.QRadioButton,
@@ -40,13 +47,19 @@ class Node(QtWidgets.QGraphicsRectItem):
     def onClick(self, checked):
         if not self.edge:
             node = self
+            self.widget.setChecked(True)
         else:
             node = self.edge.start if self.is_input else self.edge.end
+            self.removeEdge()
+            node.widget.setChecked(True)
         self.widget.connecting.emit((node, self))
 
-    def setEdge(self, edge: Edge):
+    def removeEdge(self):
         if self.edge:
-            self.scene().removeItem(self.edge)
+            self.edge.remove()
+
+    def setEdge(self, edge: Edge):
+        self.removeEdge()
         self.edge = edge
         self.widget.setChecked(True)
 
@@ -135,13 +148,21 @@ class Scene(QtWidgets.QGraphicsScene):
         else:
             connectingTo = nodes[1]
             connectingFrom = self.connectingFrom
-            self.removeItem(self.connectingLine)
-            self.connectingLine = None
-            self.connectingFrom = None
+            self.stopConnecting()
             a = connectingFrom if connectingTo.is_input else connectingTo
             b = connectingFrom if connectingFrom.is_input else connectingTo
-            if a is not b:
+            if a is not b and a.parentItem() is not b.parentItem():
                 self.connectNodes(a, b)
+            else:
+                connectingTo.widget.setChecked(False)
+
+    def stopConnecting(self):
+        if self.connectingLine is not None:
+            self.removeItem(self.connectingLine)
+        if self.connectingFrom is not None:
+            self.connectingFrom.widget.setChecked(False)
+        self.connectingLine = None
+        self.connectingFrom = None
 
     def mouseMoveEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
         if self.connectingLine is not None:
@@ -149,8 +170,11 @@ class Scene(QtWidgets.QGraphicsScene):
             self.connectingLine.updatePos(endPos=mousePos)
         return super().mouseMoveEvent(event)
 
-    #  def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
-    #     return super().mousePressEvent(event)
+    def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
+        items = self.items(event.scenePos())
+        if not any(type(x) is Node for x in items):
+            self.stopConnecting()
+        return super().mousePressEvent(event)
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -165,11 +189,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.addRectButton.clicked.connect(self.scene.addBlock)
         self.connectButton.clicked.connect(self.scene.connectAllBlocks)
 
-        self.keys = {45: self.zoom_out, 61: self.zoom_in}
+        self.keys = {
+                    45: self.zoom_out,  # -
+                    61: self.zoom_in,  # +
+                    16777216: self.scene.stopConnecting,  # esc
+                     }
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         key = event.key()
         self.keys.get(key, lambda: None)()
+        super().keyPressEvent(event)
 
     def zoom_out(self):
         self.zoom(zoom_out=True)
