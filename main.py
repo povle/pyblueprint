@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsItem
 from PyQt5 import QtGui, QtWidgets, uic, QtCore
+import functions
 
 BLACK = QtGui.QColor(0, 0, 0)
 
@@ -22,6 +23,12 @@ class Edge(Line):
         super().__init__(start.centerPos(), end.centerPos())
         self.start = start
         self.end = end
+
+    def startBlock(self):
+        return self.start.parentItem()
+
+    def endBlock(self):
+        return self.end.parentItem()
 
     def updatePos(self):
         super().updatePos(self.start.centerPos(), self.end.centerPos())
@@ -80,18 +87,14 @@ class NodeWidget(QtWidgets.QRadioButton):
     connecting = QtCore.pyqtSignal(object)
 
 
-class Block(QtWidgets.QGraphicsRectItem):
-    def __init__(self, pos=(0, 0), label='None', parent=None):
+class AbstractBlock(QtWidgets.QGraphicsRectItem):
+    def __init__(self, widget, pos=(0, 0), parent=None):
         QtWidgets.QGraphicsRectItem.__init__(self, *pos, 0, 0, parent=parent)
 
-        self.widget = BlockWidget()
-        self.widget.label.setText(label)
+        self.widget = widget
         self.proxy = QtWidgets.QGraphicsProxyWidget(self)
         self.proxy.setWidget(self.widget)
         self.setRect(*pos, self.widget.width(), self.widget.height())
-
-        self.inputNode = Node(self.widget.inputRadioButton, self, True)
-        self.outputNode = Node(self.widget.outputRadioButton, self)
 
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
@@ -99,20 +102,74 @@ class Block(QtWidgets.QGraphicsRectItem):
         self.setPen(QtGui.QPen(BLACK))
         self.setBrush(QtGui.QBrush(BLACK))
 
+        self.nodes = []
+
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
-            self.inputNode.updateEdge()
-            self.outputNode.updateEdge()
+            [x.updateEdge() for x in self.nodes]
         return super().itemChange(change, value)
 
     def connectTo(self, b):
         self.outputNode.connectTo(b.inputNode)
 
+    def acceptInput(self, val):
+        raise NotImplementedError
 
-class BlockWidget(QtWidgets.QWidget):
+
+class FunctionBlock(AbstractBlock):
+    def __init__(self, function=functions.bypass, pos=(0, 0), parent=None):
+        super().__init__(FunctionBlockWidget(), pos=pos, parent=parent)
+        self.widget.label.setText(function.__name__)
+        self.function = function
+        self.inputNode = Node(self.widget.inputRadioButton, self, True)
+        self.outputNode = Node(self.widget.outputRadioButton, self)
+        self.nodes = [self.inputNode, self.outputNode]
+        self.result = None
+
+    def acceptInput(self, val):
+        self.result = self.function(val)
+        if self.outputNode.edge:
+            self.outputNode.edge.endBlock().acceptInput(self.result)
+
+
+class FunctionBlockWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        uic.loadUi('./Block.ui', self)
+        uic.loadUi('./FunctionBlock.ui', self)
+
+
+class OutputBlock(AbstractBlock):
+    def __init__(self, pos=(0, 0), parent=None):
+        super().__init__(OutputBlockWidget(), pos=pos, parent=parent)
+        self.inputNode = Node(self.widget.inputRadioButton, self, True)
+        self.nodes = [self.inputNode]
+
+    def acceptInput(self, val):
+        self.widget.label.setText(str(val))
+
+
+class OutputBlockWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+        uic.loadUi('./OutputBlock.ui', self)
+
+
+class InputBlock(AbstractBlock):
+    def __init__(self, pos=(0, 0), parent=None):
+        super().__init__(InputBlockWidget(), pos=pos, parent=parent)
+        self.outputNode = Node(self.widget.outputRadioButton, self)
+        self.nodes = [self.outputNode]
+
+    def startChain(self):
+        val = self.widget.lineEdit.text()
+        if self.outputNode.edge:
+            self.outputNode.edge.endBlock().acceptInput(val)
+
+
+class InputBlockWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+        uic.loadUi('./InputBlock.ui', self)
 
 
 class Scene(QtWidgets.QGraphicsScene):
@@ -121,17 +178,19 @@ class Scene(QtWidgets.QGraphicsScene):
         self.blocks = []
         self.connectingLine = None
         self.connectingFrom = None
+        self.inputBlock = InputBlock()
+        self.addBlock(self.inputBlock)
+        self.outputBlock = OutputBlock()
+        self.addBlock(self.outputBlock)
 
-    def addBlock(self):
-        block = Block()
+    def addBlock(self, block: AbstractBlock):
         self.addItem(block)
         self.blocks.append(block)
-        block.inputNode.widget.connecting.connect(self.onConnecting)
-        block.outputNode.widget.connecting.connect(self.onConnecting)
+        for node in block.nodes:
+            node.widget.connecting.connect(self.onConnecting)
 
-    def connectAllBlocks(self):
-        for a, b in zip(self.blocks[:-1], self.blocks[1:]):
-            a.connectTo(b)
+    def addFunctionBlock(self):
+        self.addBlock(FunctionBlock(functions.reverse))
 
     def onConnecting(self, nodes: tuple):
         mousePos = self.parent().mapFromGlobal(QtGui.QCursor.pos())
@@ -174,6 +233,9 @@ class Scene(QtWidgets.QGraphicsScene):
             self.stopConnecting()
         return super().mousePressEvent(event)
 
+    def run(self):
+        self.inputBlock.startChain()
+
 
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -184,8 +246,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graphicsView.setScene(self.scene)
         self.graphicsView.setMouseTracking(True)
 
-        self.addRectButton.clicked.connect(self.scene.addBlock)
-        self.connectButton.clicked.connect(self.scene.connectAllBlocks)
+        self.addBlockButton.clicked.connect(self.scene.addFunctionBlock)
+        self.runButton.clicked.connect(self.scene.run)
 
         self.keys = {
                     45: self.zoom_out,  # -
