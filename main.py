@@ -79,10 +79,19 @@ class Node(QtWidgets.QGraphicsRectItem):
             self.edge.updatePos()
 
     def connectTo(self, b):
-        edge = Edge(self, b)
+        if self.is_input:
+            edge = Edge(b, self)
+        else:
+            edge = Edge(self, b)
         self.setEdge(edge)
         b.setEdge(edge)
         self.scene().addItem(edge)
+
+    def compatibleWith(self, b) -> bool:
+        identity_compatible = self.parentItem() is not b.parentItem()
+        input_compatible = (self.is_input and not b.is_input or
+                            not self.is_input and b.is_input)
+        return identity_compatible and input_compatible
 
 
 class NodeWidget(QtWidgets.QRadioButton):
@@ -212,10 +221,8 @@ class Scene(QtWidgets.QGraphicsScene):
             connectingFrom = self.connectingFrom
             self.stopConnecting()
             connectingTo.widget.setChecked(False)
-            a = connectingFrom if connectingTo.is_input else connectingTo
-            b = connectingFrom if connectingFrom.is_input else connectingTo
-            if a is not b and a.parentItem() is not b.parentItem():
-                a.connectTo(b)
+            if connectingFrom.compatibleWith(connectingTo):
+                connectingFrom.connectTo(connectingTo)
 
     def stopConnecting(self):
         if self.connectingLine is not None:
