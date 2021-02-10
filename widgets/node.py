@@ -1,16 +1,19 @@
 from PyQt5 import QtWidgets, QtCore
+import typing
 from . import Edge
 
 
 class Node(QtWidgets.QGraphicsRectItem):
     def __init__(self, nodeWidget: QtWidgets.QRadioButton,
-                 parent: QtWidgets.QGraphicsItem, is_input=False):
+                 parent: QtWidgets.QGraphicsItem, allowed_type=None,
+                 is_input=False):
         super().__init__(0, 0, nodeWidget.width(), nodeWidget.height(), parent)
         self.widget = nodeWidget
         self.widget.clicked.connect(self.onClick)
         self.setPos(nodeWidget.x()+nodeWidget.parentWidget().x(),
                     nodeWidget.y()+nodeWidget.parentWidget().y())
         self.is_input = is_input
+        self.allowed_type = allowed_type
         self.edge = None
 
     def onClick(self, checked):
@@ -48,10 +51,20 @@ class Node(QtWidgets.QGraphicsRectItem):
         self.scene().addItem(edge)
 
     def compatibleWith(self, b) -> bool:
-        identity_compatible = self.parentItem() is not b.parentItem()
-        input_compatible = (self.is_input and not b.is_input or
-                            not self.is_input and b.is_input)
-        return identity_compatible and input_compatible
+        if self.parentItem() is b.parentItem():
+            return False
+
+        inp = self if self.is_input else b
+        out = b if not b.is_input else self
+        if inp is out:
+            return False
+
+        out_type = out.allowed_type
+        in_type = inp.allowed_type
+        if not issubclass(out_type, typing.get_args(in_type) or in_type):
+            return False
+
+        return True
 
 
 class NodeWidget(QtWidgets.QRadioButton):

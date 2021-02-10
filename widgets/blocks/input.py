@@ -6,7 +6,8 @@ from . import AbstractBlock
 class InputBlock(AbstractBlock):
     def __init__(self, pos=(0, 0), parent=None):
         super().__init__(InputBlockWidget(), pos=pos, parent=parent)
-        self.outputNode = Node(self.widget.outputRadioButton, self)
+        self.outputNode = Node(self.widget.outputRadioButton, self,
+                               allowed_type=str)
         self.nodes = [self.outputNode]
 
     def startChain(self):
