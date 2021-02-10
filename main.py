@@ -7,7 +7,7 @@ from widgets import Scene
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        uic.loadUi('./ui/proto.ui', self)
+        uic.loadUi('./ui/MainWindow.ui', self)
         self.setWindowTitle('test')
         self.scene = Scene(self.graphicsView)
         self.graphicsView.setScene(self.scene)
