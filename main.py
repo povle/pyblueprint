@@ -148,7 +148,7 @@ class FunctionBlock(AbstractBlock):
 class FunctionBlockWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        uic.loadUi('./FunctionBlock.ui', self)
+        uic.loadUi('./ui/FunctionBlock.ui', self)
 
 
 class OutputBlock(AbstractBlock):
@@ -164,7 +164,7 @@ class OutputBlock(AbstractBlock):
 class OutputBlockWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        uic.loadUi('./OutputBlock.ui', self)
+        uic.loadUi('./ui/OutputBlock.ui', self)
 
 
 class InputBlock(AbstractBlock):
@@ -182,7 +182,7 @@ class InputBlock(AbstractBlock):
 class InputBlockWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        uic.loadUi('./InputBlock.ui', self)
+        uic.loadUi('./ui/InputBlock.ui', self)
 
 
 class Scene(QtWidgets.QGraphicsScene):
@@ -251,7 +251,7 @@ class Scene(QtWidgets.QGraphicsScene):
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        uic.loadUi('./proto.ui', self)
+        uic.loadUi('./ui/proto.ui', self)
         self.setWindowTitle('test')
         self.scene = Scene(self.graphicsView)
         self.graphicsView.setScene(self.scene)
