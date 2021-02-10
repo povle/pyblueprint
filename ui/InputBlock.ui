@@ -51,7 +51,7 @@
   <customwidget>
    <class>NodeWidget</class>
    <extends>QRadioButton</extends>
-   <header>main</header>
+   <header>widgets/node</header>
   </customwidget>
  </customwidgets>
  <resources/>
