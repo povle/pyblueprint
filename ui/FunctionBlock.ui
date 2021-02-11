@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>179</width>
-    <height>92</height>
+    <height>68</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,6 +20,12 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <property name="spacing">
@@ -120,7 +126,11 @@
       </layout>
      </item>
      <item>
-      <layout class="QVBoxLayout" name="inputRowVerticalLayout"/>
+      <layout class="QVBoxLayout" name="inputRowVerticalLayout">
+       <property name="spacing">
+        <number>3</number>
+       </property>
+      </layout>
      </item>
      <item>
       <layout class="QHBoxLayout" name="outputHorizontalLayout">
