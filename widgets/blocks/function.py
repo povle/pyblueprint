@@ -1,7 +1,8 @@
 from PyQt5 import QtWidgets, uic
 import typing
+import pandas
 from .. import Node
-from . import AbstractBlock
+from . import AbstractBlock, PlotWindow
 
 
 class BoolInputRow(QtWidgets.QCheckBox):
@@ -60,12 +61,21 @@ class FunctionBlock(AbstractBlock):
         self.errorBox = None
 
         self.widget.errorButton.clicked.connect(self.showErrorBox)
+        self.widget.plotButton.clicked.connect(self.showPlot)
+
+    def showPlot(self):
+        if type(self.result) is pandas.DataFrame:
+            self.plot = PlotWindow()
+            self.plot.show()
+            self.result.plot(ax=self.plot.axes)
 
     def showErrorBox(self):
         if self.errorBox is not None:
             self.errorBox.show()
 
     def propagate(self, val):
+        self.widget.plotButton.setEnabled(False)
+        self.plot = None
         try:
             kwargs = {arg_name: row.getVal()
                       for arg_name, row in self.inputRows.items()}
@@ -76,5 +86,7 @@ class FunctionBlock(AbstractBlock):
         else:
             self.errorBox = None
             self.widget.errorButton.setEnabled(False)
+            if type(self.result) is pandas.DataFrame:
+                self.widget.plotButton.setEnabled(True)
             if self.outputNode.edge:
                 self.outputNode.edge.endBlock().propagate(self.result)
