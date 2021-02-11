@@ -1,6 +1,6 @@
 from PyQt5 import QtGui, QtWidgets
 from . import Node, Line
-from .blocks import AbstractBlock, FunctionBlock, InputBlock, OutputBlock
+from .blocks import AbstractBlock, FunctionBlock, FileInputBlock, OutputBlock
 
 
 class Scene(QtWidgets.QGraphicsScene):
@@ -9,7 +9,7 @@ class Scene(QtWidgets.QGraphicsScene):
         self.blocks = []
         self.connectingLine = None
         self.connectingFrom = None
-        self.inputBlock = InputBlock((0, -50))
+        self.inputBlock = FileInputBlock((0, -50))
         self.addBlock(self.inputBlock)
         self.outputBlock = OutputBlock((0, 50))
         self.addBlock(self.outputBlock)
