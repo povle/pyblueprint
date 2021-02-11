@@ -28,5 +28,8 @@ def square(data: int) -> int:
     return data**2
 
 
-def to_hex(data: int) -> str:
-    return hex(data)
+def to_hex(data: int, capitalize: bool, offset: int) -> str:
+    h = hex(data+offset)
+    if capitalize:
+        h = h.upper()
+    return h
