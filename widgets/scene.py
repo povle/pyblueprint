@@ -1,9 +1,12 @@
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets, QtCore
 from . import Node, Line
 from .blocks import AbstractBlock, FunctionBlock, FileInputBlock, OutputBlock
 
 
 class Scene(QtWidgets.QGraphicsScene):
+    connectingStarted = QtCore.pyqtSignal(object)
+    connectingStopped = QtCore.pyqtSignal(object)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.blocks = []
@@ -19,6 +22,8 @@ class Scene(QtWidgets.QGraphicsScene):
         self.blocks.append(block)
         for node in block.nodes:
             node.widget.connecting.connect(self.onConnecting)
+            self.connectingStarted.connect(node.onConnectingStarted)
+            self.connectingStopped.connect(node.onConnectingStopped)
 
     def addFunctionBlock(self, function):
         self.addBlock(FunctionBlock(function))
@@ -34,6 +39,7 @@ class Scene(QtWidgets.QGraphicsScene):
             self.connectingFrom.widget.setChecked(True)
             self.connectingLine = Line(nodes[0].centerPos(), mousePos)
             self.addItem(self.connectingLine)
+            self.connectingStarted.emit(nodes[0])
         else:
             connectingTo = nodes[1]
             connectingFrom = self.connectingFrom
@@ -47,8 +53,10 @@ class Scene(QtWidgets.QGraphicsScene):
             self.removeItem(self.connectingLine)
         if self.connectingFrom is not None:
             self.connectingFrom.widget.setChecked(False)
+        connectingFrom = self.connectingFrom
         self.connectingLine = None
         self.connectingFrom = None
+        self.connectingStopped.emit(connectingFrom)
 
     def mouseMoveEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
         if self.connectingLine is not None:
@@ -58,9 +66,12 @@ class Scene(QtWidgets.QGraphicsScene):
 
     def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent):
         items = self.items(event.scenePos())
-        if not any(type(x) is Node for x in items):
+        if self.connectingFrom and\
+            not any(type(x) is Node and x.compatibleWith(self.connectingFrom)
+                    for x in items):
             self.stopConnecting()
-        return super().mousePressEvent(event)
+        else:
+            return super().mousePressEvent(event)
 
     def run(self):
         self.inputBlock.propagate()

@@ -24,6 +24,15 @@ class Node(QtWidgets.QGraphicsRectItem):
             self.removeEdge()
         self.widget.connecting.emit((node, self))
 
+    def onConnectingStarted(self, node):
+        if node is self:
+            return
+        if not self.compatibleWith(node):
+            self.widget.setEnabled(False)
+
+    def onConnectingStopped(self, node):
+        self.widget.setEnabled(True)
+
     def removeEdge(self):
         if self.edge is not None:
             self.edge.remove()
