@@ -28,9 +28,9 @@ class FileInputBlock(AbstractBlock):
             with open(self.file_name) as f:
                 self.result = f.read().replace('\n', '')
 
-    def startChain(self):
+    def propagate(self, val=None):
         if self.outputNode.edge and self.result:
-            self.outputNode.edge.endBlock().acceptInput(self.result)
+            self.outputNode.edge.endBlock().propagate(self.result)
 
 
 class InputBlockWidget(QtWidgets.QWidget):

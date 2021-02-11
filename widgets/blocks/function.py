@@ -36,8 +36,6 @@ class FunctionBlock(AbstractBlock):
     def __init__(self, function, pos=(0, 0), parent=None):
         widget = FunctionBlockWidget()
         widget.label.setText(function.__name__)
-
-        self.function = function
         hints = typing.get_type_hints(function)
         data_hint = hints.pop('data', None)
         return_hint = hints.pop('return', None)
@@ -47,9 +45,10 @@ class FunctionBlock(AbstractBlock):
             if arg_type in self.INPUT_ROW_TYPES:
                 row = self.INPUT_ROW_TYPES[arg_type](arg_name=arg_name)
                 self.inputRows[arg_name] = row
-                widget.verticalLayout.addWidget(row)
+                widget.inputRowVerticalLayout.addWidget(row)
 
         super().__init__(widget, pos=pos, parent=parent)
+        self.function = function
         self.inputNode = Node(self.widget.inputRadioButton, self,
                               allowed_type=data_hint, is_input=True)
         self.outputNode = Node(self.widget.outputRadioButton, self,
@@ -57,9 +56,9 @@ class FunctionBlock(AbstractBlock):
         self.nodes = [self.inputNode, self.outputNode]
         self.result = None
 
-    def acceptInput(self, val):
+    def propagate(self, val):
         kwargs = {arg_name: row.getVal()
                   for arg_name, row in self.inputRows.items()}
         self.result = self.function(data=val, **kwargs)
         if self.outputNode.edge:
-            self.outputNode.edge.endBlock().acceptInput(self.result)
+            self.outputNode.edge.endBlock().propagate(self.result)

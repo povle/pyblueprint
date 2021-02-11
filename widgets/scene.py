@@ -63,4 +63,4 @@ class Scene(QtWidgets.QGraphicsScene):
         return super().mousePressEvent(event)
 
     def run(self):
-        self.inputBlock.startChain()
+        self.inputBlock.propagate()

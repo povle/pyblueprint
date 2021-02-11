@@ -12,7 +12,7 @@ class OutputBlock(AbstractBlock):
                               allowed_type=typing.Union[str, int])
         self.nodes = [self.inputNode]
 
-    def acceptInput(self, val):
+    def propagate(self, val):
         self.widget.label.setText(str(val))
 
 

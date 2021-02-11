@@ -29,5 +29,5 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
     def connectTo(self, b):
         self.outputNode.connectTo(b.inputNode)
 
-    def acceptInput(self, val):
+    def propagate(self, val):
         raise NotImplementedError

@@ -10,10 +10,10 @@ class InputBlock(AbstractBlock):
                                allowed_type=str)
         self.nodes = [self.outputNode]
 
-    def startChain(self):
+    def propagate(self, val=None):
         val = self.widget.lineEdit.text()
         if self.outputNode.edge:
-            self.outputNode.edge.endBlock().acceptInput(val)
+            self.outputNode.edge.endBlock().propagate(val)
 
 
 class InputBlockWidget(QtWidgets.QWidget):
