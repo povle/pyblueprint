@@ -49,16 +49,32 @@ class FunctionBlock(AbstractBlock):
 
         super().__init__(widget, pos=pos, parent=parent)
         self.function = function
+
         self.inputNode = Node(self.widget.inputRadioButton, self,
                               allowed_type=data_hint, is_input=True)
         self.outputNode = Node(self.widget.outputRadioButton, self,
                                allowed_type=return_hint)
         self.nodes = [self.inputNode, self.outputNode]
+
         self.result = None
+        self.errorBox = None
+
+        self.widget.errorButton.clicked.connect(self.showErrorBox)
+
+    def showErrorBox(self):
+        if self.errorBox is not None:
+            self.errorBox.show()
 
     def propagate(self, val):
-        kwargs = {arg_name: row.getVal()
-                  for arg_name, row in self.inputRows.items()}
-        self.result = self.function(data=val, **kwargs)
-        if self.outputNode.edge:
-            self.outputNode.edge.endBlock().propagate(self.result)
+        try:
+            kwargs = {arg_name: row.getVal()
+                      for arg_name, row in self.inputRows.items()}
+            self.result = self.function(data=val, **kwargs)
+        except Exception as e:
+            self.errorBox = QtWidgets.QMessageBox(0, 'Error', repr(e))
+            self.widget.errorButton.setEnabled(True)
+        else:
+            self.errorBox = None
+            self.widget.errorButton.setEnabled(False)
+            if self.outputNode.edge:
+                self.outputNode.edge.endBlock().propagate(self.result)

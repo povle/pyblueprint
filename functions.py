@@ -14,10 +14,7 @@ def capitalize(data: str) -> str:
 
 
 def to_int(data: str) -> int:
-    try:
-        return int(data)
-    except ValueError:
-        return -1
+    return int(data)
 
 
 def to_str(data: Union[str, int]) -> str:
