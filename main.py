@@ -1,5 +1,4 @@
 from PyQt5 import QtGui, QtWidgets, uic
-import inspect
 import functions
 from widgets import Scene
 
@@ -12,25 +11,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.scene = Scene(self.graphicsView)
         self.graphicsView.setScene(self.scene)
         self.graphicsView.setMouseTracking(True)
+        self.graphicsView.setAcceptDrops(True)
 
-        self.addBlockButton.clicked.connect(self.addFunctionBlock)
         self.runButton.clicked.connect(self.scene.run)
 
-        self.functions = {name: func for name, func in
-                          inspect.getmembers(functions,
-                                             predicate=inspect.isfunction)}
-
-        self.functionSelectBox.addItems(sorted(self.functions.keys()))
+        self.functionList.addFunctions(functions)
 
         self.keys = {
                     45: self.zoom_out,  # -
                     61: self.zoom_in,  # +
                     16777216: self.scene.stopConnecting,  # esc
                      }
-
-    def addFunctionBlock(self):
-        function = self.functions[self.functionSelectBox.currentText()]
-        self.scene.addFunctionBlock(function)
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         key = event.key()

@@ -23,8 +23,8 @@ class Scene(QtWidgets.QGraphicsScene):
             self.connectingStarted.connect(node.onConnectingStarted)
             self.connectingStopped.connect(node.onConnectingStopped)
 
-    def addFunctionBlock(self, function):
-        self.addBlock(FunctionBlock(function))
+    def addFunctionBlock(self, function, pos=(0, 0)):
+        self.addBlock(FunctionBlock(function, pos=pos))
 
     def onConnecting(self, nodes: tuple):
         mousePos = self.parent().mapFromGlobal(QtGui.QCursor.pos())
@@ -70,6 +70,25 @@ class Scene(QtWidgets.QGraphicsScene):
             self.stopConnecting()
         else:
             return super().mousePressEvent(event)
+
+    def dragMoveEvent(self, event: QtWidgets.QGraphicsSceneDragDropEvent):
+        mimeData = event.mimeData()
+        if mimeData.hasFormat('application/x-qabstractitemmodeldatalist'):
+            event.accept()
+        else:
+            return super().dragMoveEvent(event)
+
+    def dropEvent(self, event: QtWidgets.QGraphicsSceneDragDropEvent):
+        mimeData = event.mimeData()
+        if mimeData.hasFormat('application/x-qabstractitemmodeldatalist'):
+            item = event.source().selectedItems()[0]
+            if item.type() == 1001:
+                pos = (event.scenePos().x()/2,
+                       event.scenePos().y()/2)
+                self.addFunctionBlock(item.function, pos=pos)
+            event.accept()
+        else:
+            return super().dropEvent(event)
 
     def run(self):
         self.inputBlock.propagate()
