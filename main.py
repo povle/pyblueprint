@@ -1,6 +1,7 @@
 from PyQt5 import QtGui, QtWidgets, uic
-import functions
+from functions import input as _input, output, processing, visualisation
 from widgets import Scene
+from widgets.blocks import InputBlock, ProcessingBlock, VisualisationBlock
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -15,7 +16,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.runButton.clicked.connect(self.scene.run)
 
-        self.functionList.addFunctions(functions)
+        self.functionList.addFunctions(module=_input,
+                                       block_class=InputBlock)
+        self.functionList.addFunctions(module=processing,
+                                       block_class=ProcessingBlock)
+        self.functionList.addFunctions(module=visualisation,
+                                       block_class=VisualisationBlock)
 
         self.keys = {
                     45: self.zoom_out,  # -

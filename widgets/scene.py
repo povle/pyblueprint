@@ -1,6 +1,6 @@
 from PyQt5 import QtGui, QtWidgets, QtCore
 from . import Node, Line
-from .blocks import AbstractBlock, FunctionBlock, FileInputBlock
+from .blocks import AbstractBlock, InputBlock
 
 
 class Scene(QtWidgets.QGraphicsScene):
@@ -12,10 +12,8 @@ class Scene(QtWidgets.QGraphicsScene):
         self.blocks = []
         self.connectingLine = None
         self.connectingFrom = None
-        self.inputBlock = FileInputBlock((0, -50))
-        self.addBlock(self.inputBlock)
 
-    def addBlock(self, block: AbstractBlock):
+    def _addBlock(self, block: AbstractBlock):
         self.addItem(block)
         self.blocks.append(block)
         for node in block.nodes:
@@ -23,8 +21,8 @@ class Scene(QtWidgets.QGraphicsScene):
             self.connectingStarted.connect(node.onConnectingStarted)
             self.connectingStopped.connect(node.onConnectingStopped)
 
-    def addFunctionBlock(self, function, pos=(0, 0)):
-        self.addBlock(FunctionBlock(function, pos=pos))
+    def addBlock(self, function, block_class, pos=(0, 0)):
+        self._addBlock(block_class(function=function, pos=pos))
 
     def onConnecting(self, nodes: tuple):
         mousePos = self.parent().mapFromGlobal(QtGui.QCursor.pos())
@@ -85,10 +83,14 @@ class Scene(QtWidgets.QGraphicsScene):
             if item.type() == 1001:
                 pos = (event.scenePos().x()/2,
                        event.scenePos().y()/2)
-                self.addFunctionBlock(item.function, pos=pos)
+                self.addBlock(function=item.function,
+                              block_class=item.block_class,
+                              pos=pos)
             event.accept()
         else:
             return super().dropEvent(event)
 
     def run(self):
-        self.inputBlock.propagate()
+        for block in self.blocks:
+            if type(block) is InputBlock:
+                block.propagate(None)
