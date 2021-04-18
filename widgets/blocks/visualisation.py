@@ -25,7 +25,7 @@ class VisualisationBlock(AbstractBlock):
 class VisualisationBlockWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        uic.loadUi('./ui/ProcessingBlock.ui', self)  # FIXME: сделать виджет
+        uic.loadUi('./ui/VisualisationBlock.ui', self)
 
 
 class PlotWindow(QtWidgets.QWidget):

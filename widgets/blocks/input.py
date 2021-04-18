@@ -1,3 +1,4 @@
+import inspect
 from PyQt5 import QtWidgets, uic, QtCore
 from PyQt5.QtWidgets import QFileDialog
 from . import AbstractBlock
@@ -14,17 +15,21 @@ class InputBlock(AbstractBlock):
         self.widget.fileOpenButton.clicked.connect(self.openFileDialog)
         self.file_path = None
 
+        doc = inspect.getdoc(function)
+        self.file_filter = '*' if not doc else doc.splitlines()[0]
+
     def openFileDialog(self):
-        file_path = QFileDialog.getOpenFileName(self.widget, 'Select a file',
-                                                '.', 'CSV files (*.csv)')[0]
+        file_path = QFileDialog.getOpenFileName(self.widget,
+                                                'Select a file',
+                                                '.',
+                                                f'({self.file_filter})')[0]
         self.file_path = file_path or self.file_path
         if not self.file_path:
-            # FIXME: для имени файла должно быть отдельное поле
-            self.widget.label.setAlignment(QtCore.Qt.AlignHCenter)
-            self.widget.label.setText('Select a file...')
+            self.widget.fileLabel.setAlignment(QtCore.Qt.AlignLeft)
+            self.widget.fileLabel.setText('None')
         else:
-            self.widget.label.setAlignment(QtCore.Qt.AlignRight)
-            self.widget.label.setText(self.file_path)
+            self.widget.fileLabel.setAlignment(QtCore.Qt.AlignRight)
+            self.widget.fileLabel.setText(self.file_path)
 
     def processData(self, data):
         if self.file_path is not None:
@@ -34,4 +39,4 @@ class InputBlock(AbstractBlock):
 class InputBlockWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        uic.loadUi('./ui/FileInputBlock.ui', self)
+        uic.loadUi('./ui/InputBlock.ui', self)
