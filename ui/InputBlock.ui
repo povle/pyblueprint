@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>285</width>
-    <height>75</height>
+    <width>164</width>
+    <height>85</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -57,16 +57,32 @@
       </widget>
      </item>
      <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>5</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <widget class="QLabel" name="label">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>150</width>
+         <width>0</width>
          <height>0</height>
         </size>
        </property>
@@ -88,7 +104,26 @@
        <property name="wordWrap">
         <bool>false</bool>
        </property>
+       <property name="margin">
+        <number>0</number>
+       </property>
       </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>5</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <widget class="QToolButton" name="fileOpenButton">
@@ -126,7 +161,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Selected file: </string>
+        <string>Selected file:</string>
        </property>
       </widget>
      </item>
@@ -151,6 +186,9 @@
        </property>
        <property name="text">
         <string>None</string>
+       </property>
+       <property name="margin">
+        <number>5</number>
        </property>
       </widget>
      </item>
