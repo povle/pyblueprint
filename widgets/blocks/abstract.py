@@ -24,12 +24,26 @@ class IntInputRow(QtWidgets.QWidget):
         return self.spinBox.value()
 
 
-# FIXME: кнопки не совпадают со своими нодами
 class AbstractBlock(QtWidgets.QGraphicsRectItem):
     INPUT_ROW_TYPES = {bool: BoolInputRow, int: IntInputRow}
 
     def __init__(self, widget, function,
                  pos=(0, 0), parent=None, special_args=[]):
+
+        self.function = function
+        hints = typing.get_type_hints(function)
+        data_hint = hints.pop('data', None)
+        return_hint = hints.pop('return', None)
+        for arg in special_args:
+            hints.pop(arg, None)
+
+        self.inputRows = {}
+        for arg_name, arg_type in hints.items():
+            if arg_type in self.INPUT_ROW_TYPES:
+                row = self.INPUT_ROW_TYPES[arg_type](arg_name=arg_name)
+                self.inputRows[arg_name] = row
+                widget.inputRowVerticalLayout.addWidget(row)
+
         QtWidgets.QGraphicsRectItem.__init__(self, 0, 0, 0, 0, parent=parent)
         self.setPos(*pos)
 
@@ -46,13 +60,6 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
         self.setPen(QtGui.QPen(QtGui.QColor(0, 0, 0)))
         self.setBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
 
-        self.function = function
-        hints = typing.get_type_hints(function)
-        data_hint = hints.pop('data', None)
-        return_hint = hints.pop('return', None)
-        for arg in special_args:
-            hints.pop(arg, None)
-
         self.nodes = []
         if data_hint is not None:
             self.inputNode = Node(self.widget.inputRadioButton, self,
@@ -61,13 +68,6 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
         self.outputNode = Node(self.widget.outputRadioButton, self,
                                allowed_type=return_hint)
         self.nodes.append(self.outputNode)
-
-        self.inputRows = {}
-        for arg_name, arg_type in hints.items():
-            if arg_type in self.INPUT_ROW_TYPES:
-                row = self.INPUT_ROW_TYPES[arg_type](arg_name=arg_name)
-                self.inputRows[arg_name] = row
-                widget.inputRowVerticalLayout.addWidget(row)
 
         self.result = None
         self.errorBox = None
