@@ -1,34 +1,15 @@
 from PyQt5.QtWidgets import QGraphicsItem
 from PyQt5 import QtGui, QtWidgets, uic
 from .. import Node
+from .input_rows import INPUT_ROW_TYPES
 import typing
 
 
-class BoolInputRow(QtWidgets.QCheckBox):
-    def __init__(self, arg_name, *args, **kwargs):
-        super().__init__(text=arg_name, *args, **kwargs)
-        self.arg_name = arg_name
-
-    def getVal(self):
-        return self.isChecked()
-
-
-class IntInputRow(QtWidgets.QWidget):
-    def __init__(self, arg_name, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        uic.loadUi('./ui/IntInputRow.ui', self)
-        self.label.setText(arg_name)
-        self.arg_name = arg_name
-
-    def getVal(self):
-        return self.spinBox.value()
-
-
 class AbstractBlock(QtWidgets.QGraphicsRectItem):
-    INPUT_ROW_TYPES = {bool: BoolInputRow, int: IntInputRow}
-
-    def __init__(self, widget, function,
+    def __init__(self, uifile, function,
                  pos=(0, 0), parent=None, special_args=[]):
+        self.nodes = []
+        self.widget = BlockWidget(uifile=uifile, block=self)
 
         self.function = function
         hints = typing.get_type_hints(function)
@@ -39,20 +20,19 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
 
         self.inputRows = {}
         for arg_name, arg_type in hints.items():
-            if arg_type in self.INPUT_ROW_TYPES:
-                row = self.INPUT_ROW_TYPES[arg_type](arg_name=arg_name)
+            if arg_type in INPUT_ROW_TYPES:
+                row = INPUT_ROW_TYPES[arg_type](arg_name=arg_name)
                 self.inputRows[arg_name] = row
-                widget.inputRowVerticalLayout.addWidget(row)
+                self.widget.inputRowVerticalLayout.addWidget(row)
 
         QtWidgets.QGraphicsRectItem.__init__(self, 0, 0, 0, 0, parent=parent)
         self.setPos(*pos)
 
-        self.widget = widget
         self.proxy = QtWidgets.QGraphicsProxyWidget(self)
         self.proxy.setWidget(self.widget)
         self.proxy.setPos(*pos)
-        self.setRect(*pos, self.widget.width(), self.widget.height())
-        widget.label.setText(function.__name__)
+        self.updateSize()
+        self.widget.label.setText(function.__name__)
 
         self.setFlag(QGraphicsItem.ItemIsMovable, True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
@@ -60,7 +40,6 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
         self.setPen(QtGui.QPen(QtGui.QColor(0, 0, 0)))
         self.setBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
 
-        self.nodes = []
         if data_hint is not None:
             self.inputNode = Node(self.widget.inputRadioButton, self,
                                   allowed_type=data_hint, is_input=True)
@@ -103,3 +82,22 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
         self.result = self.processData(data)
         if self.outputNode.edge and self.result is not None:
             self.outputNode.edge.endBlock().propagate(self.result)
+
+    def updateSize(self):
+        self.setRect(self.widget.pos().x(),
+                     self.widget.pos().y(),
+                     self.widget.width(),
+                     self.widget.height())
+        for node in self.nodes:
+            node.updatePos()
+
+
+class BlockWidget(QtWidgets.QWidget):
+    def __init__(self, uifile, block: AbstractBlock, parent=None):
+        super().__init__(parent=parent)
+        uic.loadUi(uifile, self)
+        self.block = block
+
+    def resizeEvent(self, a0: QtGui.QResizeEvent):
+        self.block.updateSize()
+        return super().resizeEvent(a0)

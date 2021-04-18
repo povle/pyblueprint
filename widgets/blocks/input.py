@@ -1,12 +1,12 @@
 import inspect
-from PyQt5 import QtWidgets, uic, QtCore
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import QFileDialog
 from . import AbstractBlock
 
 
 class InputBlock(AbstractBlock):
     def __init__(self, function, pos=(0, 0), parent=None):
-        super().__init__(widget=InputBlockWidget(),
+        super().__init__(uifile='./ui/InputBlock.ui',
                          function=function,
                          pos=pos,
                          parent=parent,
@@ -34,9 +34,3 @@ class InputBlock(AbstractBlock):
     def processData(self, data):
         if self.file_path is not None:
             return self.executeFunction(path=self.file_path)
-
-
-class InputBlockWidget(QtWidgets.QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-        uic.loadUi('./ui/InputBlock.ui', self)

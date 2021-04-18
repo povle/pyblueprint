@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtCore, uic
+from PyQt5 import QtWidgets, QtCore
 from matplotlib.backends.backend_qt5agg import (FigureCanvasQTAgg,
                                                 NavigationToolbar2QT)
 from matplotlib.figure import Figure
@@ -7,7 +7,7 @@ from . import AbstractBlock
 
 class VisualisationBlock(AbstractBlock):
     def __init__(self, function, pos=(0, 0), parent=None):
-        super().__init__(widget=VisualisationBlockWidget(),
+        super().__init__(uifile='./ui/VisualisationBlock.ui',
                          function=function,
                          pos=pos,
                          parent=parent,
@@ -20,12 +20,6 @@ class VisualisationBlock(AbstractBlock):
         result = self.executeFunction(data=data, axes=self.plot.axes)
         self.widget.plotButton.setEnabled(result is not None)
         return data
-
-
-class VisualisationBlockWidget(QtWidgets.QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-        uic.loadUi('./ui/VisualisationBlock.ui', self)
 
 
 class PlotWindow(QtWidgets.QWidget):
