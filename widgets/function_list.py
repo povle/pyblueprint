@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from types import ModuleType
 from typing import Callable, Type
 from .blocks import AbstractBlock
@@ -22,12 +22,29 @@ class FunctionList(QtWidgets.QListWidget):
         self.functions = {}
 
     def addFunctions(self, module: ModuleType,
-                     block_class: Type[AbstractBlock]):
+                     block_class: Type[AbstractBlock],
+                     sep_title=None):
+        if sep_title is not None:
+            self.insertSeparator(sep_title)
         functions = dict(inspect.getmembers(module,
                                             predicate=inspect.isfunction))
         self.functions.update(functions)
-        for name in sorted(functions.keys()):
+        for n, name in enumerate(sorted(functions.keys())):
             self.addItem(FunctionListItem(function=self.functions[name],
                                           block_class=block_class,
                                           name=name,
                                           parent=self))
+
+    def insertSeparator(self, title=''):
+        separator = QtWidgets.QListWidgetItem(title.center(21, '-'),
+                                              parent=self)
+
+        font = separator.font()
+        font.setBold(True)
+        separator.setFont(font)
+
+        separator.setFlags(separator.flags()
+                           & ~QtCore.Qt.ItemFlag.ItemIsSelectable
+                           & ~QtCore.Qt.ItemFlag.ItemIsDragEnabled)
+
+        self.addItem(separator)

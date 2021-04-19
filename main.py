@@ -17,11 +17,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.runButton.clicked.connect(self.scene.run)
 
         self.functionList.addFunctions(module=_input,
-                                       block_class=InputBlock)
+                                       block_class=InputBlock,
+                                       sep_title='Input')
         self.functionList.addFunctions(module=processing,
-                                       block_class=ProcessingBlock)
+                                       block_class=ProcessingBlock,
+                                       sep_title='Processing')
         self.functionList.addFunctions(module=visualisation,
-                                       block_class=VisualisationBlock)
+                                       block_class=VisualisationBlock,
+                                       sep_title='Visualisation')
 
         self.keys = {
                     45: self.zoom_out,  # -
