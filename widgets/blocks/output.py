@@ -1,5 +1,4 @@
 import inspect
-from PyQt5 import QtCore
 from PyQt5.QtWidgets import QFileDialog
 from . import AbstractBlock
 
