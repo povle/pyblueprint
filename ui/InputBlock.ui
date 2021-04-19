@@ -32,8 +32,11 @@
    <item>
     <layout class="QHBoxLayout" name="centralHorizontalLayout">
      <item>
-      <widget class="QToolButton" name="errorButton">
+      <widget class="ErrorButton" name="errorButton">
        <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="mouseTracking">
         <bool>false</bool>
        </property>
        <property name="autoFillBackground">
@@ -234,6 +237,11 @@
    <class>NodeWidget</class>
    <extends>QRadioButton</extends>
    <header>widgets/node</header>
+  </customwidget>
+  <customwidget>
+   <class>ErrorButton</class>
+   <extends>QToolButton</extends>
+   <header>widgets/blocks/error_button</header>
   </customwidget>
  </customwidgets>
  <resources/>
