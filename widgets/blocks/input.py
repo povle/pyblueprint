@@ -21,7 +21,7 @@ class InputBlock(AbstractBlock):
     def openFileDialog(self):
         file_path = QFileDialog.getOpenFileName(self.widget,
                                                 'Select a file',
-                                                '.',
+                                                self.file_path or '.',
                                                 f'({self.file_filter})')[0]
         self.file_path = file_path or self.file_path
         if not self.file_path:
