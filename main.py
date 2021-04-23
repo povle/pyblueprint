@@ -36,6 +36,20 @@ class MainWindow(QtWidgets.QMainWindow):
                     16777216: self.scene.stopConnecting,  # esc
                      }
 
+        self.initMenubar()
+
+    def initMenubar(self):
+        self.menuBar().setNativeMenuBar(False)
+
+        fixPosAct = QtWidgets.QAction('Fix positions', self)
+        fixPosAct.setCheckable(True)
+        fixPosAct.triggered.connect(self.scene.setPositionsFixed)
+
+        prefMenu = self.menuBar().addMenu('&Preferences')
+        prefMenu.addAction(fixPosAct)
+
+        self.menuBar().addMenu('&Edit')
+
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         key = event.key()
         self.keys.get(key, lambda: None)()
@@ -60,8 +74,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
-    login_window = LoginWindow()
-    if login_window.exec_() == QtWidgets.QDialog.Accepted:
-        w = MainWindow()
-        w.show()
-        app.exec_()
+
+    # FIXME temporarily disabled login
+    # login_window = LoginWindow()
+    # if login_window.exec_() == QtWidgets.QDialog.Accepted:
+    w = MainWindow()
+    w.show()
+    app.exec_()

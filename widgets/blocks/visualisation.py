@@ -6,12 +6,13 @@ from . import AbstractBlock
 
 
 class VisualisationBlock(AbstractBlock):
-    def __init__(self, function, pos=(0, 0), parent=None):
+    def __init__(self, function, pos=(0, 0), parent=None, movable=True):
         super().__init__(uifile='./ui/VisualisationBlock.ui',
                          function=function,
                          pos=pos,
                          parent=parent,
-                         special_args=['axes'])
+                         special_args=['axes'],
+                         movable=movable)
 
         self.plot = PlotWindow()
         self.widget.plotButton.clicked.connect(self.plot.show)

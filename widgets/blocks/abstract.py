@@ -7,7 +7,7 @@ import typing
 
 class AbstractBlock(QtWidgets.QGraphicsRectItem):
     def __init__(self, uifile, function,
-                 pos=(0, 0), parent=None, special_args=[]):
+                 pos=(0, 0), parent=None, special_args=[], movable=True):
         self.nodes = []
         self.widget = BlockWidget(uifile=uifile, block=self)
 
@@ -34,7 +34,7 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
         self.updateSize()
         self.widget.label.setText(function.__name__)
 
-        self.setFlag(QGraphicsItem.ItemIsMovable, True)
+        self.setMovable(movable)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemSendsScenePositionChanges, True)
         self.setPen(QtGui.QPen(QtGui.QColor(0, 0, 0)))
@@ -74,6 +74,9 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
             self.errorBox = QtWidgets.QMessageBox(0, 'Error', repr(e))
             self.widget.errorButton.setEnabled(True)
             return None
+
+    def setMovable(self, state: bool):
+        self.setFlag(QGraphicsItem.ItemIsMovable, state)
 
     def processData(self, data):
         raise NotImplementedError

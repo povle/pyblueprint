@@ -5,12 +5,13 @@ from . import AbstractBlock
 
 
 class InputBlock(AbstractBlock):
-    def __init__(self, function, pos=(0, 0), parent=None):
+    def __init__(self, function, pos=(0, 0), parent=None, movable=True):
         super().__init__(uifile='./ui/InputBlock.ui',
                          function=function,
                          pos=pos,
                          parent=parent,
-                         special_args=['path'])
+                         special_args=['path'],
+                         movable=movable)
 
         self.widget.fileOpenButton.clicked.connect(self.openFileDialog)
         self.file_path = None
