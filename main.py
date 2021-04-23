@@ -58,8 +58,25 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graphicsView.scale(zoomFactor, zoomFactor)
 
 
+class LoginWindow(QtWidgets.QDialog):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        uic.loadUi('./ui/LoginWindow.ui', self)
+        self.loginPushButton.clicked.connect(self.handleLogin)
+
+    def handleLogin(self):
+        if (self.usernameLineEdit.text() == 'foo'
+            and self.passwordLineEdit.text() == 'bar'):
+            self.accept()
+        else:
+            self.warningLabel: QtWidgets.QLabel
+            self.warningLabel.setText('Неверное имя пользователя или пароль')
+
+
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
-    w = MainWindow()
-    w.show()
-    app.exec_()
+    login_window = LoginWindow()
+    if login_window.exec_() == QtWidgets.QDialog.Accepted:
+        w = MainWindow()
+        w.show()
+        app.exec_()
