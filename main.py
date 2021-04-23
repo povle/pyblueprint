@@ -1,6 +1,6 @@
 from PyQt5 import QtGui, QtWidgets, uic
 from functions import input as _input, output, processing, visualisation
-from widgets import Scene
+from widgets import Scene, LoginWindow
 from widgets.blocks import (InputBlock, OutputBlock,
                             ProcessingBlock, VisualisationBlock)
 
@@ -56,21 +56,6 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             zoomFactor = zoomOutFactor
         self.graphicsView.scale(zoomFactor, zoomFactor)
-
-
-class LoginWindow(QtWidgets.QDialog):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        uic.loadUi('./ui/LoginWindow.ui', self)
-        self.loginPushButton.clicked.connect(self.handleLogin)
-
-    def handleLogin(self):
-        if (self.usernameLineEdit.text() == 'foo'
-            and self.passwordLineEdit.text() == 'bar'):
-            self.accept()
-        else:
-            self.warningLabel: QtWidgets.QLabel
-            self.warningLabel.setText('Неверное имя пользователя или пароль')
 
 
 if __name__ == '__main__':
