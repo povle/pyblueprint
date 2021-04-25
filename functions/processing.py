@@ -9,7 +9,7 @@ def transpose(data: pandas.DataFrame) -> pandas.DataFrame:
     return data.transpose()
 
 
-def scale(data: pandas.DataFrame, factor: int) -> pandas.DataFrame:
+def scale(data: pandas.DataFrame, factor: float) -> pandas.DataFrame:
     return data * factor
 
 
