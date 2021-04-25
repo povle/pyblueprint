@@ -22,13 +22,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.initMenubar()
 
         self.addFunctions(module=_input, block_class=InputBlock,
-                          title='Input')
+                          title='Ввод')
         self.addFunctions(module=processing, block_class=ProcessingBlock,
-                          title='Processing')
+                          title='Обработка')
         self.addFunctions(module=visualisation, block_class=VisualisationBlock,
-                          title='Visualisation')
+                          title='Визуализация')
         self.addFunctions(module=output, block_class=OutputBlock,
-                          title='Output')
+                          title='Сохранение')
 
         self.keys = {
                     45: self.zoom_out,  # -
@@ -39,14 +39,14 @@ class MainWindow(QtWidgets.QMainWindow):
     def initMenubar(self):
         self.menuBar().setNativeMenuBar(False)
 
-        fixPosAct = QtWidgets.QAction('Fix positions', self)
+        fixPosAct = QtWidgets.QAction('Зафиксировать блоки', self)
         fixPosAct.setCheckable(True)
         fixPosAct.triggered.connect(self.scene.setPositionsFixed)
 
-        self.prefMenu = self.menuBar().addMenu('&Preferences')
+        self.prefMenu = self.menuBar().addMenu('&Настройки')
         self.prefMenu.addAction(fixPosAct)
 
-        self.editMenu = self.menuBar().addMenu('&Edit')
+        self.editMenu = self.menuBar().addMenu('&Редактировать')
 
     def addFunctions(self, module: ModuleType,
                      block_class: Type[AbstractBlock],
