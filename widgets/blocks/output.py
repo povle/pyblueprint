@@ -20,7 +20,7 @@ class OutputBlock(AbstractBlock):
 
     def openFileDialog(self):
         file_path = QFileDialog.getSaveFileName(self.widget,
-                                                'Select a file',
+                                                'Выбрать файл',
                                                 self.file_path or '.',
                                                 f'({self.file_filter})')[0]
         self.file_path = file_path

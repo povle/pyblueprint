@@ -77,7 +77,7 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
                            for arg_name, row in self.inputRows.items()})
             return self.function(*args, **kwargs)
         except Exception as e:
-            self.errorBox = QtWidgets.QMessageBox(0, 'Error', repr(e))
+            self.errorBox = QtWidgets.QMessageBox(0, 'Ошибка', repr(e))
             self.widget.errorButton.setEnabled(True)
             return None
 
