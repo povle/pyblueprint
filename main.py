@@ -14,7 +14,6 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         uic.loadUi('./ui/MainWindow.ui', self)
-        self.setWindowTitle('test')
         self.scene = Scene(self.graphicsView)
         self.graphicsView.setScene(self.scene)
         self.graphicsView.setMouseTracking(True)

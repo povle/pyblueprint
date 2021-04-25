@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>PyBlueprint</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -87,7 +87,7 @@
          <item>
           <widget class="QPushButton" name="runButton">
            <property name="text">
-            <string>Run</string>
+            <string>Запустить</string>
            </property>
           </widget>
          </item>
