@@ -52,6 +52,7 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
         self.errorBox = None
 
         self.widget.errorButton.clicked.connect(self.showErrorBox)
+        self.widget.removeButton.clicked.connect(self.remove)
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemPositionHasChanged:
@@ -64,6 +65,11 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
     def showErrorBox(self):
         if self.errorBox is not None:
             self.errorBox.show()
+
+    def remove(self):
+        for node in self.nodes:
+            node.removeEdge()
+        self.scene().removeItem(self)
 
     def executeFunction(self, *args, **kwargs):
         try:
