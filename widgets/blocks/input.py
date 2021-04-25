@@ -26,10 +26,8 @@ class InputBlock(AbstractBlock):
                                                 f'({self.file_filter})')[0]
         self.file_path = file_path or self.file_path
         if not self.file_path:
-            self.widget.fileLabel.setAlignment(QtCore.Qt.AlignLeft)
             self.widget.fileLabel.setText('None')
         else:
-            self.widget.fileLabel.setAlignment(QtCore.Qt.AlignRight)
             self.widget.fileLabel.setText(self.file_path)
 
     def processData(self, data):
