@@ -1,3 +1,4 @@
+import os
 from PyQt5 import QtGui, QtWidgets, uic
 from types import ModuleType
 from typing import Type
@@ -5,6 +6,8 @@ from functions import input as _input, output, processing, visualisation
 from widgets import Scene, LoginWindow
 from widgets.blocks import (AbstractBlock, InputBlock, OutputBlock,
                             ProcessingBlock, VisualisationBlock)
+
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 class MainWindow(QtWidgets.QMainWindow):
