@@ -1,7 +1,9 @@
 from PyQt5 import QtGui, QtWidgets, uic
+from types import ModuleType
+from typing import Type
 from functions import input as _input, output, processing, visualisation
 from widgets import Scene, LoginWindow
-from widgets.blocks import (InputBlock, OutputBlock,
+from widgets.blocks import (AbstractBlock, InputBlock, OutputBlock,
                             ProcessingBlock, VisualisationBlock)
 
 
@@ -17,26 +19,22 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.runButton.clicked.connect(self.scene.run)
 
-        self.functionList.addFunctions(module=_input,
-                                       block_class=InputBlock,
-                                       sep_title='Input')
-        self.functionList.addFunctions(module=processing,
-                                       block_class=ProcessingBlock,
-                                       sep_title='Processing')
-        self.functionList.addFunctions(module=visualisation,
-                                       block_class=VisualisationBlock,
-                                       sep_title='Visualisation')
-        self.functionList.addFunctions(module=output,
-                                       block_class=OutputBlock,
-                                       sep_title='Output')
+        self.initMenubar()
+
+        self.addFunctions(module=_input, block_class=InputBlock,
+                          title='Input')
+        self.addFunctions(module=processing, block_class=ProcessingBlock,
+                          title='Processing')
+        self.addFunctions(module=visualisation, block_class=VisualisationBlock,
+                          title='Visualisation')
+        self.addFunctions(module=output, block_class=OutputBlock,
+                          title='Output')
 
         self.keys = {
                     45: self.zoom_out,  # -
                     61: self.zoom_in,  # +
                     16777216: self.scene.stopConnecting,  # esc
                      }
-
-        self.initMenubar()
 
     def initMenubar(self):
         self.menuBar().setNativeMenuBar(False)
@@ -45,10 +43,20 @@ class MainWindow(QtWidgets.QMainWindow):
         fixPosAct.setCheckable(True)
         fixPosAct.triggered.connect(self.scene.setPositionsFixed)
 
-        prefMenu = self.menuBar().addMenu('&Preferences')
-        prefMenu.addAction(fixPosAct)
+        self.prefMenu = self.menuBar().addMenu('&Preferences')
+        self.prefMenu.addAction(fixPosAct)
 
-        self.menuBar().addMenu('&Edit')
+        self.editMenu = self.menuBar().addMenu('&Edit')
+
+    def addFunctions(self, module: ModuleType,
+                     block_class: Type[AbstractBlock],
+                     title=None):
+        self.functionList.addFunctions(module=module,
+                                       block_class=block_class,
+                                       sep_title=title)
+        editAct = QtWidgets.QAction(title, self)
+        # TODO open Notepad on click
+        self.editMenu.addAction(editAct)
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         key = event.key()
