@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>164</width>
+    <width>187</width>
     <height>93</height>
    </rect>
   </property>
@@ -164,7 +164,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Selected file:</string>
+        <string>Выбранный файл: </string>
        </property>
       </widget>
      </item>
@@ -188,7 +188,7 @@
         </font>
        </property>
        <property name="text">
-        <string>None</string>
+        <string>Нет</string>
        </property>
        <property name="margin">
         <number>5</number>
