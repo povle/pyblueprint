@@ -83,9 +83,8 @@ class MainWindow(QtWidgets.QMainWindow):
 if __name__ == '__main__':
     app = QtWidgets.QApplication([])
 
-    # FIXME temporarily disabled login
-    # login_window = LoginWindow()
-    # if login_window.exec_() == QtWidgets.QDialog.Accepted:
-    w = MainWindow()
-    w.show()
-    app.exec_()
+    login_window = LoginWindow()
+    if login_window.exec_() == QtWidgets.QDialog.Accepted:
+        w = MainWindow()
+        w.show()
+        app.exec_()
