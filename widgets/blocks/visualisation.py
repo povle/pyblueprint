@@ -6,6 +6,8 @@ from . import AbstractBlock
 
 
 class VisualisationBlock(AbstractBlock):
+    """Блок визуализации."""
+
     def __init__(self, function, pos=(0, 0), parent=None, movable=True):
         super().__init__(uifile='./ui/VisualisationBlock.ui',
                          function=function,

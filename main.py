@@ -12,6 +12,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
 class MainWindow(QtWidgets.QMainWindow):
+    """Главное окно приложения."""
+
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         uic.loadUi('./ui/MainWindow.ui', self)
@@ -30,6 +32,7 @@ class MainWindow(QtWidgets.QMainWindow):
                      }
 
     def initMenubar(self):
+        """Инициализировать строку меню."""
         self.menuBar().setNativeMenuBar(False)
 
         fixPosAct = QtWidgets.QAction('Зафиксировать блоки', self)
@@ -46,10 +49,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.editMenu.addAction(reloadAct)
 
     def reloadFunctions(self):
+        """Перезагрузить модули функций."""
         self.functionList.clear()
         self.loadFunctions(reload=True)
 
     def loadFunctions(self, reload=False):
+        """Инициализировать все модули функций."""
         self.addFunctions(module=_input, blockClass=InputBlock,
                           title='Ввод', reload=reload)
         self.addFunctions(module=processing, blockClass=ProcessingBlock,
@@ -62,6 +67,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def addFunctions(self, module: ModuleType,
                      blockClass: Type[AbstractBlock],
                      title=None, reload=False):
+        """Инициализировать модуль функций."""
         if reload:
             importlib.reload(module)
         else:
@@ -74,10 +80,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
     @staticmethod
     def editModule(module: ModuleType):
+        """Открыть окно редактирования модуля функций."""
         path = os.path.abspath(module.__file__)
         os.system(f'notepad.exe {path}')
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
+        """Обработать нажатие на клавишу."""
         key = event.key()
         self.keys.get(key, lambda: None)()
         super().keyPressEvent(event)

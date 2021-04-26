@@ -10,6 +10,8 @@ OFF = QtGui.QIcon.State.Off
 
 
 class ErrorButton(QtWidgets.QToolButton):
+    """Индикатор ошибки и кнопка, открывающая содержание ошибки."""
+
     modes = [NORMAL, DISABLED, ACTIVE, SELECTED]
     states = [ON, OFF]
 

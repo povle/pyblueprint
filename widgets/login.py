@@ -4,6 +4,7 @@ import bcrypt
 
 
 def createTable():
+    """Создать базу пользователей, если она не существует."""
     with sqlite3.connect('./users.db') as db:
         c = db.cursor()
         c.execute(
@@ -15,7 +16,11 @@ def createTable():
         )
 
 
-def getUser(username: str):
+def getUser(username: str) -> bytes:
+    """
+    Возвращает хэш пароля пользователя с соответствующим ником или None,
+    если его не существует.
+    """
     with sqlite3.connect('./users.db') as db:
         c = db.cursor()
         c.execute('SELECT * FROM users WHERE username=?', (username,))
@@ -26,6 +31,7 @@ def getUser(username: str):
 
 
 def addUser(username: str, password: str):
+    """Добавить в базу пользователя."""
     password = password.encode('utf8')
     hashed = bcrypt.hashpw(password, bcrypt.gensalt()).decode('utf8')
     with sqlite3.connect('./users.db') as db:
@@ -36,6 +42,8 @@ def addUser(username: str, password: str):
 
 
 class LoginWindow(QtWidgets.QDialog):
+    """Окно входа в приложение."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         uic.loadUi('./ui/LoginWindow.ui', self)
@@ -44,6 +52,7 @@ class LoginWindow(QtWidgets.QDialog):
         self.registerPushButton.clicked.connect(self.handleRegister)
 
     def handleLogin(self):
+        """Обработать попытку входа."""
         username = self.usernameLineEdit.text()
         password = self.passwordLineEdit.text().encode('utf8')
         hash = getUser(username)
@@ -53,10 +62,13 @@ class LoginWindow(QtWidgets.QDialog):
             self.warningLabel.setText('Неверное имя пользователя или пароль')
 
     def handleRegister(self):
+        """Обработать нажатие на кнопку Зарегистрироваться."""
         RegisterWindow(parent=self).show()
 
 
 class RegisterWindow(QtWidgets.QDialog):
+    """Окно регистрации."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         uic.loadUi('./ui/RegisterWindow.ui', self)
@@ -65,6 +77,7 @@ class RegisterWindow(QtWidgets.QDialog):
             b'$2b$12$LnxesfT3kv3.5cY2SW1NQeZG5slMnJFqhwM73g6MvYFnqIyHQPfSW'
 
     def handleRegister(self):
+        """Обработать попытку регистрации."""
         username = self.usernameLineEdit.text()
         password = self.passwordLineEdit.text()
         validationCode = self.validationLineEdit.text().encode('utf8')

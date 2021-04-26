@@ -6,6 +6,8 @@ import inspect
 
 
 class FunctionListItem(QtWidgets.QListWidgetItem):
+    """Элемент списка функций."""
+
     def __init__(self,
                  function: Callable,
                  blockClass: Type[AbstractBlock],
@@ -18,6 +20,8 @@ class FunctionListItem(QtWidgets.QListWidgetItem):
 
 
 class FunctionList(QtWidgets.QListWidget):
+    """Список функций."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.functions = {}
@@ -25,6 +29,7 @@ class FunctionList(QtWidgets.QListWidget):
     def addFunctions(self, module: ModuleType,
                      blockClass: Type[AbstractBlock],
                      sepTitle=None):
+        """Добавить в список модуль функций."""
         if sepTitle is not None:
             self.insertSeparator(sepTitle)
         functions = dict(inspect.getmembers(module,
@@ -37,6 +42,7 @@ class FunctionList(QtWidgets.QListWidget):
                                           parent=self))
 
     def insertSeparator(self, title=''):
+        """Вставить в список разделитель."""
         separator = QtWidgets.QListWidgetItem(title.center(21, '-'),
                                               parent=self)
 

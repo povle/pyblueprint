@@ -2,6 +2,8 @@ from . import AbstractBlock
 
 
 class ProcessingBlock(AbstractBlock):
+    """Блок обработки данных."""
+
     def __init__(self, function, pos=(0, 0), parent=None, movable=True):
         super().__init__(uifile='./ui/ProcessingBlock.ui',
                          function=function,

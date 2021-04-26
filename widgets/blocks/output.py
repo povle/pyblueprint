@@ -4,6 +4,8 @@ from . import AbstractBlock
 
 
 class OutputBlock(AbstractBlock):
+    """Блок сохранения данных."""
+
     def __init__(self, function, pos=(0, 0), parent=None, movable=True):
         super().__init__(uifile='./ui/OutputBlock.ui',
                          function=function,
@@ -19,6 +21,7 @@ class OutputBlock(AbstractBlock):
         self.fileFilter = '*' if not doc else doc.splitlines()[0]
 
     def openFileDialog(self):
+        """Открыть окно выбора файла и обработать результат."""
         filePath = QFileDialog.getSaveFileName(self.widget,
                                                'Выбрать файл',
                                                self.filePath or '.',

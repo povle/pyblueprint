@@ -4,6 +4,8 @@ from . import Edge
 
 
 class Node(QtWidgets.QGraphicsRectItem):
+    """Графический объект, соответствующий месту соединения блока и ребра."""
+
     def __init__(self, nodeWidget: QtWidgets.QRadioButton,
                  parent: QtWidgets.QGraphicsItem, allowedType=None,
                  isInput=False):
@@ -16,6 +18,7 @@ class Node(QtWidgets.QGraphicsRectItem):
         self.allowedType = allowedType
 
     def onClick(self, checked):
+        """Обработать нажатие."""
         if not self.edge:
             node = self
         else:
@@ -24,37 +27,45 @@ class Node(QtWidgets.QGraphicsRectItem):
         self.widget.connecting.emit((node, self))
 
     def onConnectingStarted(self, node):
+        """Обработать начало режима соединения."""
         if node is self:
             return
         if not self.compatibleWith(node):
             self.widget.setEnabled(False)
 
     def onConnectingStopped(self, node):
+        """Обработать завершение режима соединения."""
         self.widget.setEnabled(True)
 
     def removeEdge(self):
+        """Удалить ребро этого узла, если оно существует."""
         if self.edge is not None:
             self.edge.remove()
 
     def setEdge(self, edge: Edge):
+        """Устанавливает ребро для этого узла."""
         self.removeEdge()
         self.edge = edge
         self.widget.setChecked(True)
 
     def centerPos(self):
+        """Возвращает позицию центра узла в виде (x, y)."""
         return (self.scenePos().x() + self.rect().width()/2,
                 self.scenePos().y() + self.rect().height()/2)
 
     def updatePos(self):
+        """Обновить позицию узла."""
         self.setPos(self.widget.x()+self.widget.parentWidget().x(),
                     self.widget.y()+self.widget.parentWidget().y())
         self.updateEdge()
 
     def updateEdge(self):
+        """Обновить позицию ребра этого узла, если оно существует."""
         if self.edge is not None:
             self.edge.updatePos()
 
     def connectTo(self, b):
+        """Соединить узел с узлом b."""
         if self.isInput:
             edge = Edge(b, self)
         else:
@@ -64,6 +75,7 @@ class Node(QtWidgets.QGraphicsRectItem):
         self.scene().addItem(edge)
 
     def compatibleWith(self, b) -> bool:
+        """Возвращает True если узел совместим с узлом b."""
         if self.parentItem() is b.parentItem():
             return False
 
@@ -81,4 +93,5 @@ class Node(QtWidgets.QGraphicsRectItem):
 
 
 class NodeWidget(QtWidgets.QRadioButton):
+    """Виджет, соответствующий узлу"""
     connecting = QtCore.pyqtSignal(object)
