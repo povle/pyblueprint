@@ -118,10 +118,10 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
 
     def updateSize(self):
         """Обновить размер блока."""
-        self.setRect(self.widget.pos().x(),
-                     self.widget.pos().y(),
-                     self.widget.width(),
-                     self.widget.height())
+        self.setRect(self.widget.pos().x()-1,
+                     self.widget.pos().y()-1,
+                     self.widget.width()+2,
+                     self.widget.height()+2)
         for node in self.nodes:
             node.updatePos()
 
