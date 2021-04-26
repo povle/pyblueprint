@@ -26,8 +26,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loadFunctions()
 
         self.keys = {
-                    45: self.zoom_out,  # -
-                    61: self.zoom_in,  # +
                     16777216: self.scene.stopConnecting,  # esc
                      }
 
@@ -83,22 +81,6 @@ class MainWindow(QtWidgets.QMainWindow):
         key = event.key()
         self.keys.get(key, lambda: None)()
         super().keyPressEvent(event)
-
-    def zoom_out(self):
-        self.zoom(zoom_out=True)
-
-    def zoom_in(self):
-        self.zoom(zoom_out=False)
-
-    def zoom(self, zoom_out):
-        zoomInFactor = 1.25
-        zoomOutFactor = 1 / zoomInFactor
-
-        if not zoom_out:
-            zoomFactor = zoomInFactor
-        else:
-            zoomFactor = zoomOutFactor
-        self.graphicsView.scale(zoomFactor, zoomFactor)
 
 
 if __name__ == '__main__':
