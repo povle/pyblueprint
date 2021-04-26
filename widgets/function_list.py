@@ -14,6 +14,7 @@ class FunctionListItem(QtWidgets.QListWidgetItem):
         super().__init__(name, parent, 1001)
         self.function = function
         self.blockClass = blockClass
+        self.setToolTip(inspect.getdoc(function))
 
 
 class FunctionList(QtWidgets.QListWidget):
