@@ -68,11 +68,16 @@ class MainWindow(QtWidgets.QMainWindow):
             importlib.reload(module)
         else:
             editAct = QtWidgets.QAction(title, self)
-            # TODO open Notepad on click
+            editAct.triggered.connect(lambda: self.editModule(module))
             self.editMenu.addAction(editAct)
         self.functionList.addFunctions(module=module,
                                        block_class=block_class,
                                        sep_title=title)
+
+    @staticmethod
+    def editModule(module: ModuleType):
+        path = os.path.abspath(module.__file__)
+        os.system(f'notepad.exe {path}')
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         key = event.key()
