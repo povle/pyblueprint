@@ -50,17 +50,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.loadFunctions(reload=True)
 
     def loadFunctions(self, reload=False):
-        self.addFunctions(module=_input, block_class=InputBlock,
+        self.addFunctions(module=_input, blockClass=InputBlock,
                           title='Ввод', reload=reload)
-        self.addFunctions(module=processing, block_class=ProcessingBlock,
+        self.addFunctions(module=processing, blockClass=ProcessingBlock,
                           title='Обработка', reload=reload)
-        self.addFunctions(module=visualisation, block_class=VisualisationBlock,
+        self.addFunctions(module=visualisation, blockClass=VisualisationBlock,
                           title='Визуализация', reload=reload)
-        self.addFunctions(module=output, block_class=OutputBlock,
+        self.addFunctions(module=output, blockClass=OutputBlock,
                           title='Сохранение', reload=reload)
 
     def addFunctions(self, module: ModuleType,
-                     block_class: Type[AbstractBlock],
+                     blockClass: Type[AbstractBlock],
                      title=None, reload=False):
         if reload:
             importlib.reload(module)
@@ -69,8 +69,8 @@ class MainWindow(QtWidgets.QMainWindow):
             editAct.triggered.connect(lambda: self.editModule(module))
             self.editMenu.addAction(editAct)
         self.functionList.addFunctions(module=module,
-                                       block_class=block_class,
-                                       sep_title=title)
+                                       blockClass=blockClass,
+                                       sepTitle=title)
 
     @staticmethod
     def editModule(module: ModuleType):

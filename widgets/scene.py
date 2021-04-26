@@ -22,10 +22,10 @@ class Scene(QtWidgets.QGraphicsScene):
             self.connectingStarted.connect(node.onConnectingStarted)
             self.connectingStopped.connect(node.onConnectingStopped)
 
-    def addBlock(self, function, block_class, pos=(0, 0)):
-        self._addBlock(block_class(function=function,
-                                   pos=pos,
-                                   movable=self.movable))
+    def addBlock(self, function, blockClass, pos=(0, 0)):
+        self._addBlock(blockClass(function=function,
+                                  pos=pos,
+                                  movable=self.movable))
 
     def onConnecting(self, nodes: tuple):
         mousePos = self.parent().mapFromGlobal(QtGui.QCursor.pos())
@@ -87,7 +87,7 @@ class Scene(QtWidgets.QGraphicsScene):
                 pos = (event.scenePos().x()/2,
                        event.scenePos().y()/2)
                 self.addBlock(function=item.function,
-                              block_class=item.block_class,
+                              blockClass=item.blockClass,
                               pos=pos)
             event.accept()
         else:

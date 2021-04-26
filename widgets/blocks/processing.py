@@ -7,7 +7,7 @@ class ProcessingBlock(AbstractBlock):
                          function=function,
                          pos=pos,
                          parent=parent,
-                         special_args=['path'],
+                         specialArgs=['path'],
                          movable=movable)
 
     def processData(self, data):

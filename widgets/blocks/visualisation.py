@@ -11,7 +11,7 @@ class VisualisationBlock(AbstractBlock):
                          function=function,
                          pos=pos,
                          parent=parent,
-                         special_args=['axes'],
+                         specialArgs=['axes'],
                          movable=movable)
 
         self.plot = PlotWindow()

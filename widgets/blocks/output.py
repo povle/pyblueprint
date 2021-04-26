@@ -9,23 +9,23 @@ class OutputBlock(AbstractBlock):
                          function=function,
                          pos=pos,
                          parent=parent,
-                         special_args=['path'],
+                         specialArgs=['path'],
                          movable=movable)
 
         self.widget.fileOpenButton.clicked.connect(self.openFileDialog)
-        self.file_path = None
+        self.filePath = None
 
         doc = inspect.getdoc(function)
-        self.file_filter = '*' if not doc else doc.splitlines()[0]
+        self.fileFilter = '*' if not doc else doc.splitlines()[0]
 
     def openFileDialog(self):
-        file_path = QFileDialog.getSaveFileName(self.widget,
-                                                'Выбрать файл',
-                                                self.file_path or '.',
-                                                f'({self.file_filter})')[0]
-        self.file_path = file_path
-        if file_path:
-            self.executeFunction(data=self.result, path=self.file_path)
+        filePath = QFileDialog.getSaveFileName(self.widget,
+                                               'Выбрать файл',
+                                               self.filePath or '.',
+                                               f'({self.fileFilter})')[0]
+        self.filePath = filePath
+        if filePath:
+            self.executeFunction(data=self.result, path=self.filePath)
 
     def processData(self, data):
         self.result = data

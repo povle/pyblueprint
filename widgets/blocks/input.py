@@ -1,5 +1,4 @@
 import inspect
-from PyQt5 import QtCore
 from PyQt5.QtWidgets import QFileDialog
 from . import AbstractBlock
 
@@ -10,26 +9,26 @@ class InputBlock(AbstractBlock):
                          function=function,
                          pos=pos,
                          parent=parent,
-                         special_args=['path'],
+                         specialArgs=['path'],
                          movable=movable)
 
         self.widget.fileOpenButton.clicked.connect(self.openFileDialog)
-        self.file_path = None
+        self.filePath = None
 
         doc = inspect.getdoc(function)
-        self.file_filter = '*' if not doc else doc.splitlines()[0]
+        self.fileFilter = '*' if not doc else doc.splitlines()[0]
 
     def openFileDialog(self):
-        file_path = QFileDialog.getOpenFileName(self.widget,
-                                                'Выбрать файл',
-                                                self.file_path or '.',
-                                                f'({self.file_filter})')[0]
-        self.file_path = file_path or self.file_path
-        if not self.file_path:
+        filePath = QFileDialog.getOpenFileName(self.widget,
+                                               'Выбрать файл',
+                                               self.filePath or '.',
+                                               f'({self.fileFilter})')[0]
+        self.filePath = filePath or self.filePath
+        if not self.filePath:
             self.widget.fileLabel.setText('Нет')
         else:
-            self.widget.fileLabel.setText(self.file_path)
+            self.widget.fileLabel.setText(self.filePath)
 
     def processData(self, data):
-        if self.file_path is not None:
-            return self.executeFunction(path=self.file_path)
+        if self.filePath is not None:
+            return self.executeFunction(path=self.filePath)

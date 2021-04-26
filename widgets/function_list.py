@@ -8,12 +8,12 @@ import inspect
 class FunctionListItem(QtWidgets.QListWidgetItem):
     def __init__(self,
                  function: Callable,
-                 block_class: Type[AbstractBlock],
+                 blockClass: Type[AbstractBlock],
                  name: str,
                  parent: QtWidgets.QListWidget):
         super().__init__(name, parent, 1001)
         self.function = function
-        self.block_class = block_class
+        self.blockClass = blockClass
 
 
 class FunctionList(QtWidgets.QListWidget):
@@ -22,16 +22,16 @@ class FunctionList(QtWidgets.QListWidget):
         self.functions = {}
 
     def addFunctions(self, module: ModuleType,
-                     block_class: Type[AbstractBlock],
-                     sep_title=None):
-        if sep_title is not None:
-            self.insertSeparator(sep_title)
+                     blockClass: Type[AbstractBlock],
+                     sepTitle=None):
+        if sepTitle is not None:
+            self.insertSeparator(sepTitle)
         functions = dict(inspect.getmembers(module,
                                             predicate=inspect.isfunction))
         self.functions.update(functions)
         for n, name in enumerate(sorted(functions.keys())):
             self.addItem(FunctionListItem(function=self.functions[name],
-                                          block_class=block_class,
+                                          blockClass=blockClass,
                                           name=name,
                                           parent=self))
 

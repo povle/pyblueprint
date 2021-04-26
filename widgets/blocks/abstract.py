@@ -7,22 +7,22 @@ import typing
 
 class AbstractBlock(QtWidgets.QGraphicsRectItem):
     def __init__(self, uifile, function,
-                 pos=(0, 0), parent=None, special_args=[], movable=True):
+                 pos=(0, 0), parent=None, specialArgs=[], movable=True):
         self.nodes = []
         self.widget = BlockWidget(uifile=uifile, block=self)
 
         self.function = function
         hints = typing.get_type_hints(function)
-        data_hint = hints.pop('data', None)
-        return_hint = hints.pop('return', None)
-        for arg in special_args:
+        dataHint = hints.pop('data', None)
+        returnHint = hints.pop('return', None)
+        for arg in specialArgs:
             hints.pop(arg, None)
 
         self.inputRows = {}
-        for arg_name, arg_type in hints.items():
-            if arg_type in INPUT_ROW_TYPES:
-                row = INPUT_ROW_TYPES[arg_type](arg_name=arg_name)
-                self.inputRows[arg_name] = row
+        for argName, argType in hints.items():
+            if argType in INPUT_ROW_TYPES:
+                row = INPUT_ROW_TYPES[argType](argName=argName)
+                self.inputRows[argName] = row
                 self.widget.inputRowVerticalLayout.addWidget(row)
 
         QtWidgets.QGraphicsRectItem.__init__(self, 0, 0, 0, 0, parent=parent)
@@ -40,12 +40,12 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
         self.setPen(QtGui.QPen(QtGui.QColor(0, 0, 0)))
         self.setBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
 
-        if data_hint is not None:
+        if dataHint is not None:
             self.inputNode = Node(self.widget.inputRadioButton, self,
-                                  allowed_type=data_hint, is_input=True)
+                                  allowedType=dataHint, isInput=True)
             self.nodes.append(self.inputNode)
         self.outputNode = Node(self.widget.outputRadioButton, self,
-                               allowed_type=return_hint)
+                               allowedType=returnHint)
         self.nodes.append(self.outputNode)
 
         self.result = None
@@ -73,8 +73,8 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
 
     def executeFunction(self, *args, **kwargs):
         try:
-            kwargs.update({arg_name: row.getVal()
-                           for arg_name, row in self.inputRows.items()})
+            kwargs.update({argName: row.getVal()
+                           for argName, row in self.inputRows.items()})
             return self.function(*args, **kwargs)
         except Exception as e:
             self.errorBox = QtWidgets.QMessageBox(0, 'Ошибка', repr(e))
