@@ -1,6 +1,6 @@
 import os
 import importlib
-from PyQt5 import QtGui, QtWidgets, uic
+from PyQt5 import QtGui, QtWidgets, uic, QtCore
 from types import ModuleType
 from typing import Type
 from functions import input as _input, output, processing, visualisation
@@ -82,7 +82,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def editModule(module: ModuleType):
         """Открыть окно редактирования модуля функций."""
         path = os.path.abspath(module.__file__)
-        os.system(f'notepad.exe {path}')
+        QtCore.QProcess().startDetached(f'notepad.exe {path}')
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         """Обработать нажатие на клавишу."""
