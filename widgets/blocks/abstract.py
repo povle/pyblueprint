@@ -90,11 +90,17 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
         try:
             kwargs.update({argName: row.getVal()
                            for argName, row in self.inputRows.items()})
-            return self.function(*args, **kwargs)
+            res = self.function(*args, **kwargs)
         except Exception as e:
             self.errorBox = QtWidgets.QMessageBox(0, 'Ошибка', repr(e))
             self.widget.errorButton.setEnabled(True)
             return None
+        else:
+            if self.errorBox is not None:
+                self.errorBox.deleteLater()
+                self.errorBox = None
+            self.widget.errorButton.setEnabled(False)
+            return res
 
     def setMovable(self, state: bool):
         """Изменить подвижность блока."""
