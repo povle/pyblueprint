@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>206</width>
-    <height>65</height>
+    <height>67</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -191,6 +191,9 @@
    <item>
     <layout class="QVBoxLayout" name="inputRowVerticalLayout">
      <property name="spacing">
+      <number>3</number>
+     </property>
+     <property name="bottomMargin">
       <number>3</number>
      </property>
     </layout>
