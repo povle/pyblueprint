@@ -8,12 +8,12 @@ class Node(QtWidgets.QGraphicsRectItem):
                  parent: QtWidgets.QGraphicsItem, allowed_type=None,
                  is_input=False):
         super().__init__(0, 0, nodeWidget.width(), nodeWidget.height(), parent)
+        self.edge = None
         self.widget = nodeWidget
         self.widget.clicked.connect(self.onClick)
         self.updatePos()
         self.is_input = is_input
         self.allowed_type = allowed_type
-        self.edge = None
 
     def onClick(self, checked):
         if not self.edge:
@@ -48,6 +48,7 @@ class Node(QtWidgets.QGraphicsRectItem):
     def updatePos(self):
         self.setPos(self.widget.x()+self.widget.parentWidget().x(),
                     self.widget.y()+self.widget.parentWidget().y())
+        self.updateEdge()
 
     def updateEdge(self):
         if self.edge is not None:
