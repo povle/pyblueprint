@@ -1,4 +1,5 @@
 import os
+import importlib
 from PyQt5 import QtGui, QtWidgets, uic
 from types import ModuleType
 from typing import Type
@@ -22,15 +23,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.runButton.clicked.connect(self.scene.run)
 
         self.initMenubar()
-
-        self.addFunctions(module=_input, block_class=InputBlock,
-                          title='Ввод')
-        self.addFunctions(module=processing, block_class=ProcessingBlock,
-                          title='Обработка')
-        self.addFunctions(module=visualisation, block_class=VisualisationBlock,
-                          title='Визуализация')
-        self.addFunctions(module=output, block_class=OutputBlock,
-                          title='Сохранение')
+        self.loadFunctions()
 
         self.keys = {
                     45: self.zoom_out,  # -
@@ -50,15 +43,36 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.editMenu = self.menuBar().addMenu('&Редактировать')
 
+        reloadAct = QtWidgets.QAction('Перезагрузить функции', self)
+        reloadAct.triggered.connect(self.reloadFunctions)
+        self.editMenu.addAction(reloadAct)
+
+    def reloadFunctions(self):
+        self.functionList.clear()
+        self.loadFunctions(reload=True)
+
+    def loadFunctions(self, reload=False):
+        self.addFunctions(module=_input, block_class=InputBlock,
+                          title='Ввод', reload=reload)
+        self.addFunctions(module=processing, block_class=ProcessingBlock,
+                          title='Обработка', reload=reload)
+        self.addFunctions(module=visualisation, block_class=VisualisationBlock,
+                          title='Визуализация', reload=reload)
+        self.addFunctions(module=output, block_class=OutputBlock,
+                          title='Сохранение', reload=reload)
+
     def addFunctions(self, module: ModuleType,
                      block_class: Type[AbstractBlock],
-                     title=None):
+                     title=None, reload=False):
+        if reload:
+            importlib.reload(module)
+        else:
+            editAct = QtWidgets.QAction(title, self)
+            # TODO open Notepad on click
+            self.editMenu.addAction(editAct)
         self.functionList.addFunctions(module=module,
                                        block_class=block_class,
                                        sep_title=title)
-        editAct = QtWidgets.QAction(title, self)
-        # TODO open Notepad on click
-        self.editMenu.addAction(editAct)
 
     def keyPressEvent(self, event: QtGui.QKeyEvent):
         key = event.key()
