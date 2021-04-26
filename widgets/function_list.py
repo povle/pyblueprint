@@ -40,7 +40,8 @@ class FunctionList(QtWidgets.QListWidget):
                                           blockClass=blockClass,
                                           name=name,
                                           parent=self))
-
+            self.updateSize()
+    
     def insertSeparator(self, title=''):
         """Вставить в список разделитель."""
         separator = QtWidgets.QListWidgetItem(title.center(21, '-'),
@@ -55,3 +56,7 @@ class FunctionList(QtWidgets.QListWidget):
                            & ~QtCore.Qt.ItemFlag.ItemIsDragEnabled)
 
         self.addItem(separator)
+        self.updateSize()
+    
+    def updateSize(self):
+        self.setMinimumWidth(self.sizeHintForColumn(0) + 2*self.frameWidth())
