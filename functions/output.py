@@ -18,4 +18,4 @@ def output_sqlite(data: DataFrame, path: str, table_name: str) -> DataFrame:
     """*.sqlite3 *.sqlite *.db"""
     name = table_name or 'data'
     with sqlite3.connect(path) as conn:
-        data.to_sql(name, conn, if_exists='replace')
+        data.to_sql(name, conn, if_exists='replace', index=False)
