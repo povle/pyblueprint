@@ -47,10 +47,10 @@ class AbstractBlock(QtWidgets.QGraphicsRectItem):
         self.setBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0)))
 
         if dataHint is not None:
-            self.inputNode = Node(self.widget.inputRadioButton, self,
+            self.inputNode = Node(self.widget.inputNode, self,
                                   allowedType=dataHint, isInput=True)
             self.nodes.append(self.inputNode)
-        self.outputNode = Node(self.widget.outputRadioButton, self,
+        self.outputNode = Node(self.widget.outputNode, self,
                                allowedType=returnHint)
         self.nodes.append(self.outputNode)
 

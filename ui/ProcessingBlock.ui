@@ -37,7 +37,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="NodeWidget" name="inputRadioButton">
+        <widget class="NodeWidget" name="inputNode">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -193,7 +193,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="NodeWidget" name="outputRadioButton">
+        <widget class="NodeWidget" name="outputNode">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
