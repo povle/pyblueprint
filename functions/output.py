@@ -5,13 +5,11 @@ from pandas import DataFrame
 def output_csv(data: DataFrame, path: str) -> DataFrame:
     """*.csv"""
     data.to_csv(path, index=False)
-    return True
 
 
 def output_xlsx(data: DataFrame, path: str) -> DataFrame:
     """*.xlsx"""
     data.to_excel(path, index=False)
-    return True
 
 
 def output_sqlite(data: DataFrame, path: str, table_name: str) -> DataFrame:
