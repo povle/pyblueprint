@@ -16,7 +16,7 @@ class Scene(QtWidgets.QGraphicsScene):
         self.connectingFrom = None
         self.movable = True
 
-    def _addBlock(self, block: AbstractBlock):
+    def addExistingBlock(self, block: AbstractBlock):
         """Добавить существующий блок."""
         self.addItem(block)
         self.blocks.append(block)
@@ -27,9 +27,9 @@ class Scene(QtWidgets.QGraphicsScene):
 
     def addBlock(self, function, blockClass, pos=(0, 0)):
         """Инициализировать и добавить блок."""
-        self._addBlock(blockClass(function=function,
-                                  pos=pos,
-                                  movable=self.movable))
+        self.addExistingBlock(blockClass(function=function,
+                                         pos=pos,
+                                         movable=self.movable))
 
     def onConnecting(self, nodes: tuple):
         """Обработать начало или завершения соединения блоков."""
