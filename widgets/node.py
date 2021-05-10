@@ -4,7 +4,7 @@ from . import Edge
 
 
 class Node(QtWidgets.QGraphicsRectItem):
-    """Графический объект, соответствующий месту соединения блока и ребра."""
+    """Узел, соответствующий месту соединения блока и ребра."""
 
     def __init__(self, nodeWidget: QtWidgets.QRadioButton,
                  parent: QtWidgets.QGraphicsItem, allowedType=None,
