@@ -27,6 +27,8 @@ class VisualisationBlock(AbstractBlock):
 
 
 class PlotWindow(QtWidgets.QWidget):
+    """Окно графика."""
+
     def __init__(self, parent=None):
         super().__init__(parent=parent, flags=QtCore.Qt.Window)
         self.figure = Figure(figsize=(5, 4), dpi=100)
