@@ -69,7 +69,11 @@ class MainWindow(QtWidgets.QMainWindow):
                      title=None, reload=False):
         """Инициализировать модуль функций."""
         if reload:
-            importlib.reload(module)
+            try:
+                importlib.reload(module)
+            except SyntaxError as e:
+                self.errorBox = QtWidgets.QMessageBox(0, 'Ошибка', repr(e))
+                self.errorBox.show()
         else:
             editAct = QtWidgets.QAction(title, self)
             editAct.triggered.connect(lambda: self.editModule(module))
