@@ -59,4 +59,5 @@ class FunctionList(QtWidgets.QListWidget):
         self.updateSize()
 
     def updateSize(self):
+        """Обновить размер списка."""
         self.setMinimumWidth(self.sizeHintForColumn(0) + 2*self.frameWidth())
