@@ -22,6 +22,7 @@ class VisualisationBlock(AbstractBlock):
     def processData(self, data):
         self.plot.axes.clear()
         result = self.executeFunction(data=data, axes=self.plot.axes)
+        self.plot.canvas.draw()
         self.widget.plotButton.setEnabled(result is not None)
         return data
 
